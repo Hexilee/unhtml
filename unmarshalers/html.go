@@ -23,7 +23,6 @@ type (
 )
 
 const (
-	HTMLRootNode   = "html"
 	SelectorKey    = "html"
 	AttrKey        = "key"
 	DefaultAttrKey = AttrText
@@ -96,14 +95,10 @@ func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value 
 			itemType := marshaler.getDtoElemType().Elem()
 			isItemTypePtr := itemType.Kind() == reflect.Ptr
 			sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
-			marshaler.getDto().Elem().Set(sliceValue)
 
 			if isItemTypePtr {
 				itemType = itemType.Elem()
 			}
-
-			slice := sliceValue.Interface().([]interface{})
-
 			preSelection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
 				newItem := reflect.New(itemType)
 				parseErr := NewHTMLUnmarshaler("").unmarshal(selection, newItem)
@@ -113,9 +108,10 @@ func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value 
 					if !isItemTypePtr {
 						newItem = newItem.Elem()
 					}
-					slice = append(slice, newItem)
+					sliceValue = reflect.Append(sliceValue, newItem)
 				}
 			})
+			marshaler.getDto().Elem().Set(sliceValue)
 		}
 
 		if err == nil {

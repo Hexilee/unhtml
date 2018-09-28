@@ -2,22 +2,15 @@ package unmarshalers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"reflect"
 	"testing"
 )
 
-type (
-	HttpTestStruct struct {
-		Interface interface{}
-		Chan      chan int
-		Func      func()
-		Map       map[string]string
-	}
-)
-
 var (
-	httpTestStruct = HttpTestStruct{
+	htmlTestStruct = HtmlTestStruct{
 		Interface: 0,
 		Chan:      make(chan int, 0),
 		Func: func() {
@@ -26,11 +19,40 @@ var (
 		Map: make(map[string]string),
 	}
 
-	InterfaceAddr = reflect.ValueOf(&httpTestStruct).Elem().FieldByName("Interface").Addr().Interface()
-	ChanAddr = reflect.ValueOf(&httpTestStruct).Elem().FieldByName("Chan").Addr().Interface()
-	FuncAddr = reflect.ValueOf(&httpTestStruct).Elem().FieldByName("Func").Addr().Interface()
-	MapAddr = reflect.ValueOf(&httpTestStruct).Elem().FieldByName("Map").Addr().Interface()
+	InterfaceAddr = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Interface").Addr().Interface()
+	ChanAddr      = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Chan").Addr().Interface()
+	FuncAddr      = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Func").Addr().Interface()
+	MapAddr       = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Map").Addr().Interface()
 )
+
+type (
+	HtmlTestStruct struct {
+		Interface interface{}
+		Chan      chan int
+		Func      func()
+		Map       map[string]string
+	}
+
+	Link struct {
+		Text string `key:"text"`
+		Href string `key:"href"`
+	}
+
+	Course struct {
+		Code Link
+		Name Link
+		Teacher Link
+		Semester string
+		Time string
+		Location string
+	}
+
+	Courses []Course
+)
+
+func (courses Courses) Root() string {
+	return "#xsgrid > tbody > tr:nth-child(1n+2)"
+}
 
 func TestHTMLMarshaler_parseType(t *testing.T) {
 	var (
@@ -66,4 +88,13 @@ func TestHTMLMarshaler_parseType(t *testing.T) {
 			assert.Equal(t, testCase.itemType, result.dtoElemType)
 		}()
 	}
+}
+
+func TestHTMLUnmarshaler_Unmarshal(t *testing.T) {
+	TestHTML, err := ioutil.ReadFile("testFiles/courses.html")
+	assert.Nil(t, err)
+	courses := make(Courses, 0)
+	assert.Nil(t, new(HTMLUnmarshaler).Unmarshal(TestHTML, &courses))
+
+	fmt.Println(courses)
 }
