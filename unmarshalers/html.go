@@ -82,6 +82,7 @@ func (marshaler *HTMLUnmarshaler) getDtoElemType() reflect.Type {
 func (marshaler *HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 	if err == nil {
+		marshaler.initRoot(v)
 		err = marshaler.unmarshal(doc.Selection, reflect.ValueOf(v))
 	}
 	return err
@@ -90,9 +91,6 @@ func (marshaler *HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) (err err
 func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value reflect.Value) (err error) {
 	err = marshaler.initDto(value)
 	if err == nil {
-		if marshaler.getSelector() == "" {
-			marshaler.setSelector(marshaler.getRoot())
-		}
 		preSelection := selection
 		if marshaler.getKind() == reflect.Slice {
 			itemType := marshaler.getDtoElemType().Elem()
@@ -194,11 +192,10 @@ func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value 
 	return err
 }
 
-func (marshaler *HTMLUnmarshaler) getRoot() (root string) {
-	if value, ok := marshaler.getDto().Interface().(HTMLModel); ok {
-		root = value.Root()
+func (marshaler *HTMLUnmarshaler) initRoot(v interface{}) {
+	if value, ok := v.(HTMLModel); ok {
+		marshaler.setSelector(value.Root())
 	}
-	return
 }
 
 func (marshaler *HTMLUnmarshaler) parseType() (err error) {
