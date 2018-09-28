@@ -67,6 +67,6 @@ func (builder *Builder) Build() *Creator {
 	}
 }
 
-func (creator *Creator) Implement(interface{}) (err error) {
+func (creator *Creator) Impl(interface{}) (err error) {
 	return err
 }
