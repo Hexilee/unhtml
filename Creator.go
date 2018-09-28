@@ -52,7 +52,7 @@ func (builder *Builder) AddHeader(key, value string) *Builder {
 
 func (builder *Builder) Build() *Creator {
 	if builder.baseUrl == "" {
-		panic(BASE_URL_CANNOT_BE_EMPTY)
+		panic(BaseUrlCannotBeEmpty)
 	}
 
 	if builder.client == nil {
