@@ -86,7 +86,7 @@ func (marshaler *HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) (err err
 func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value reflect.Value) (err error) {
 	err = marshaler.initDto(value)
 	if err == nil {
-		preSelection := selection
+		preSelection := selection.Clone()
 		if marshaler.getKind() == reflect.Slice {
 			itemType := marshaler.getDtoElemType().Elem()
 			isItemTypePtr := itemType.Kind() == reflect.Ptr
@@ -112,9 +112,9 @@ func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value 
 
 		if err == nil {
 			if marshaler.getSelector() != ZeroStr {
-				selection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
+				selection.Find(marshaler.getSelector()).Each(func(i int, newSelection *goquery.Selection) {
 					if i == ZeroInt {
-						preSelection = selection
+						preSelection = newSelection
 					}
 				})
 			}

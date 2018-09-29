@@ -3,6 +3,7 @@ package unmarshalers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"reflect"
@@ -52,10 +53,39 @@ type (
 	}
 
 	Courses []Course
+
+	AllTypeTest struct {
+		Slice   []int    `html:"ul > li"`
+		Struct  TestUser `html:"div"`
+		String  string   `html:"p:nth-child(1)"`
+		Int     int      `html:"p:nth-child(2)"`
+		Int8    int8     `html:"p:nth-child(2)"`
+		Int16   int16    `html:"p:nth-child(2)"`
+		Int32   int32    `html:"p:nth-child(2)"`
+		Int64   int64    `html:"p:nth-child(2)"`
+		Uint    uint     `html:"p:nth-child(2)"`
+		Uint8   uint8    `html:"p:nth-child(2)"`
+		Uint16  uint16   `html:"p:nth-child(2)"`
+		Uint32  uint32   `html:"p:nth-child(2)"`
+		Uint64  uint64   `html:"p:nth-child(2)"`
+		Float32 float32  `html:"p:nth-child(3)"`
+		Float64 float64  `html:"p:nth-child(3)"`
+		Bool    bool     `html:"p:nth-child(4)"`
+	}
+
+	TestUser struct {
+		Name      string `html:"p:nth-child(1)"`
+		Age       uint   `html:"p:nth-child(2)"`
+		LikeLemon bool   `html:"p:nth-child(3)"`
+	}
 )
 
 func (courses Courses) Root() string {
 	return "#xsgrid > tbody > tr:nth-child(1n+2)"
+}
+
+func (AllTypeTest) Root() string {
+	return "#test"
 }
 
 func TestHTMLMarshaler_parseType(t *testing.T) {
@@ -102,4 +132,12 @@ func TestHTMLUnmarshaler_Unmarshal(t *testing.T) {
 	result, err := json.Marshal(courses)
 	assert.Nil(t, err)
 	assert.Equal(t, CoursesJSON, string(result))
+
+	AllTypeHTML, err := ioutil.ReadFile("testFiles/all-type.html")
+	assert.Nil(t, err)
+	allTypes := AllTypeTest{}
+	assert.Nil(t, new(HTMLUnmarshaler).Unmarshal(AllTypeHTML, &allTypes))
+	result, err = json.Marshal(&allTypes)
+	assert.Nil(t, err)
+	fmt.Println(string(result))
 }
