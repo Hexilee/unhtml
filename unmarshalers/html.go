@@ -187,12 +187,7 @@ func (HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) error {
 
 func (marshaler *RealHTMLUnmarshaler) unmarshalSlice() (err error) {
 	itemType := marshaler.getDtoElemType().Elem()
-	isItemTypePtr := itemType.Kind() == reflect.Ptr
 	sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
-
-	if isItemTypePtr {
-		itemType = itemType.Elem()
-	}
 	marshaler.selection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
 		newItem := reflect.New(itemType)
 		newUnmarshaler, buildErr := new(RealRealHTMLUnmarshalerBuilder).
@@ -201,10 +196,7 @@ func (marshaler *RealHTMLUnmarshaler) unmarshalSlice() (err error) {
 			Build()
 		if err = buildErr; err == nil {
 			if err = newUnmarshaler.unmarshal(); err == nil {
-				if !isItemTypePtr {
-					newItem = newItem.Elem()
-				}
-				sliceValue = reflect.Append(sliceValue, newItem)
+				sliceValue = reflect.Append(sliceValue, newItem.Elem())
 			}
 		}
 	})
@@ -214,81 +206,75 @@ func (marshaler *RealHTMLUnmarshaler) unmarshalSlice() (err error) {
 
 func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
 	preSelection := marshaler.selection
-	if err == nil {
-		if marshaler.getSelector() != ZeroStr {
-			marshaler.selection.Find(marshaler.getSelector()).Each(func(i int, newSelection *goquery.Selection) {
-				if i == ZeroInt {
-					preSelection = *newSelection
-				}
-			})
-		}
+	if marshaler.getSelector() != ZeroStr {
+		preSelection = *marshaler.selection.Find(marshaler.getSelector())
+	}
 
-		switch marshaler.getKind() {
-		case reflect.Slice:
-			err = marshaler.unmarshalSlice()
-		case reflect.Struct:
-			motherValue := marshaler.getDto().Elem()
-			motherType := marshaler.getDtoElemType()
-			for i := 0; i < motherValue.NumField(); i++ {
-				fieldPtr := motherValue.Field(i).Addr()
-				tag := motherType.Field(i).Tag
-				newUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
-					setDto(fieldPtr).
-					setSelection(&preSelection).
-					setSelector(tag.Get(SelectorKey)).
-					setAttrKey(tag.Get(AttrKey)).
-					Build()
-				if err = buildErr; err != nil {
-					break
-				}
-				if err = newUnmarshal.unmarshal(); err != nil {
-					break
-				}
+	switch marshaler.getKind() {
+	case reflect.Slice:
+		err = marshaler.unmarshalSlice()
+	case reflect.Struct:
+		motherValue := marshaler.getDto().Elem()
+		motherType := marshaler.getDtoElemType()
+		for i := 0; i < motherValue.NumField(); i++ {
+			fieldPtr := motherValue.Field(i).Addr()
+			tag := motherType.Field(i).Tag
+			newUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
+				setDto(fieldPtr).
+				setSelection(&preSelection).
+				setSelector(tag.Get(SelectorKey)).
+				setAttrKey(tag.Get(AttrKey)).
+				Build()
+			if err = buildErr; err != nil {
+				break
 			}
-		case reflect.String:
-			marshaler.getDto().Elem().SetString(marshaler.getAttrValue(preSelection))
-		case reflect.Int:
-			fallthrough
-		case reflect.Int8:
-			fallthrough
-		case reflect.Int16:
-			fallthrough
-		case reflect.Int32:
-			fallthrough
-		case reflect.Int64:
-			valueStr := marshaler.getAttrValue(preSelection)
-			value, err := strconv.Atoi(valueStr)
-			if err == nil {
-				marshaler.getDto().Elem().SetInt(int64(value))
+			if err = newUnmarshal.unmarshal(); err != nil {
+				break
 			}
-		case reflect.Uint:
-			fallthrough
-		case reflect.Uint8:
-			fallthrough
-		case reflect.Uint16:
-			fallthrough
-		case reflect.Uint32:
-			fallthrough
-		case reflect.Uint64:
-			valueStr := marshaler.getAttrValue(preSelection)
-			value, err := strconv.ParseUint(valueStr, 0, 0)
-			if err == nil {
-				marshaler.getDto().Elem().SetUint(value)
-			}
-		case reflect.Float32:
-			fallthrough
-		case reflect.Float64:
-			valueStr := marshaler.getAttrValue(preSelection)
-			value, err := strconv.ParseFloat(valueStr, 0)
-			if err == nil {
-				marshaler.getDto().Elem().SetFloat(value)
-			}
-		case reflect.Bool:
-			valueStr := marshaler.getAttrValue(preSelection)
-			value, err := strconv.ParseBool(valueStr)
-			if err == nil {
-				marshaler.getDto().Elem().SetBool(value)
-			}
+		}
+	case reflect.String:
+		marshaler.getDto().Elem().SetString(marshaler.getAttrValue(preSelection))
+	case reflect.Int:
+		fallthrough
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		valueStr := marshaler.getAttrValue(preSelection)
+		value, err := strconv.Atoi(valueStr)
+		if err == nil {
+			marshaler.getDto().Elem().SetInt(int64(value))
+		}
+	case reflect.Uint:
+		fallthrough
+	case reflect.Uint8:
+		fallthrough
+	case reflect.Uint16:
+		fallthrough
+	case reflect.Uint32:
+		fallthrough
+	case reflect.Uint64:
+		valueStr := marshaler.getAttrValue(preSelection)
+		value, err := strconv.ParseUint(valueStr, 0, 0)
+		if err == nil {
+			marshaler.getDto().Elem().SetUint(value)
+		}
+	case reflect.Float32:
+		fallthrough
+	case reflect.Float64:
+		valueStr := marshaler.getAttrValue(preSelection)
+		value, err := strconv.ParseFloat(valueStr, 0)
+		if err == nil {
+			marshaler.getDto().Elem().SetFloat(value)
+		}
+	case reflect.Bool:
+		valueStr := marshaler.getAttrValue(preSelection)
+		value, err := strconv.ParseBool(valueStr)
+		if err == nil {
+			marshaler.getDto().Elem().SetBool(value)
 		}
 	}
 
