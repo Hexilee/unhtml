@@ -147,27 +147,27 @@ func (builder *RealRealHTMLUnmarshalerBuilder) checkSelectionNil() (err error) {
 	return
 }
 
-func (marshaler *RealHTMLUnmarshaler) getSelection() goquery.Selection {
+func (marshaler RealHTMLUnmarshaler) getSelection() goquery.Selection {
 	return marshaler.selection
 }
 
-func (marshaler *RealHTMLUnmarshaler) getSelector() string {
+func (marshaler RealHTMLUnmarshaler) getSelector() string {
 	return marshaler.selector
 }
 
-func (marshaler *RealHTMLUnmarshaler) getAttrKey() string {
+func (marshaler RealHTMLUnmarshaler) getAttrKey() string {
 	return marshaler.attrKey
 }
 
-func (marshaler *RealHTMLUnmarshaler) getDto() reflect.Value {
+func (marshaler RealHTMLUnmarshaler) getDto() reflect.Value {
 	return marshaler.dto
 }
 
-func (marshaler *RealHTMLUnmarshaler) getKind() reflect.Kind {
+func (marshaler RealHTMLUnmarshaler) getKind() reflect.Kind {
 	return marshaler.kind
 }
 
-func (marshaler *RealHTMLUnmarshaler) getDtoElemType() reflect.Type {
+func (marshaler RealHTMLUnmarshaler) getDtoElemType() reflect.Type {
 	return marshaler.dtoElemType
 }
 
@@ -185,7 +185,7 @@ func (HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) error {
 	return err
 }
 
-func (marshaler *RealHTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) (err error) {
+func (marshaler RealHTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) (err error) {
 	itemType := marshaler.getDtoElemType().Elem()
 	sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
 	preSelection.Each(func(i int, selection *goquery.Selection) {
@@ -204,7 +204,7 @@ func (marshaler *RealHTMLUnmarshaler) unmarshalSlice(preSelection goquery.Select
 	return err
 }
 
-func (marshaler *RealHTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection) (err error) {
+func (marshaler RealHTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection) (err error) {
 	motherValue := marshaler.getDto().Elem()
 	motherType := marshaler.getDtoElemType()
 	for i := 0; i < motherValue.NumField(); i++ {
@@ -226,7 +226,7 @@ func (marshaler *RealHTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selec
 	return
 }
 
-func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
+func (marshaler RealHTMLUnmarshaler) unmarshal() (err error) {
 	preSelection := marshaler.selection
 	if marshaler.getSelector() != ZeroStr {
 		preSelection = *marshaler.selection.Find(marshaler.getSelector())
@@ -285,7 +285,7 @@ func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
 	return err
 }
 
-func (marshaler *RealHTMLUnmarshaler) getAttrValue(selection goquery.Selection) (valueStr string) {
+func (marshaler RealHTMLUnmarshaler) getAttrValue(selection goquery.Selection) (valueStr string) {
 	if marshaler.getAttrKey() == ZeroStr {
 		valueStr = selection.Text()
 	} else {
