@@ -65,7 +65,7 @@ func TestHTMLMarshaler_parseType(t *testing.T) {
 		IntSlice = make([]int, 0)
 	)
 
-	for _, testCase := range [] *struct {
+	for _, testCase := range []*struct {
 		dto      interface{}
 		kind     reflect.Kind
 		itemType reflect.Type

@@ -23,10 +23,10 @@ type (
 )
 
 const (
-	SelectorKey    = "html"
-	AttrKey        = "key"
-	ZeroInt        = 0
-	ZeroStr        = ""
+	SelectorKey = "html"
+	AttrKey     = "key"
+	ZeroInt     = 0
+	ZeroStr     = ""
 )
 
 const (
