@@ -9,10 +9,10 @@ import (
 )
 
 type (
-	HTMLFooUnmarshaler struct {
+	HTMLUnmarshaler struct {
 	}
 
-	HTMLUnmarshalerBuilder struct {
+	RealRealHTMLUnmarshalerBuilder struct {
 		dto         reflect.Value
 		kind        reflect.Kind
 		dtoElemType reflect.Type
@@ -21,7 +21,7 @@ type (
 		attrKey     string
 	}
 
-	HTMLUnmarshaler struct {
+	RealHTMLUnmarshaler struct {
 		dto         reflect.Value
 		kind        reflect.Kind
 		dtoElemType reflect.Type
@@ -47,18 +47,18 @@ const (
 	AttrSrc  = "src"
 )
 
-//func NewHTMLUnmarshaler(selection goquery.Selection, tag reflect.StructTag) *HTMLUnmarshaler {
+//func NewRealHTMLUnmarshaler(selection goquery.Selection, tag reflect.StructTag) *RealHTMLUnmarshaler {
 //	selector := tag.Get(SelectorKey)
 //	attrKey := tag.Get(AttrKey)
 //
-//	return &HTMLUnmarshaler{selection: selection, selector: selector, attrKey: attrKey}
+//	return &RealHTMLUnmarshaler{selection: selection, selector: selector, attrKey: attrKey}
 //}
 
-func (builder *HTMLUnmarshalerBuilder) Build() (unmarshaler *HTMLUnmarshaler, err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) Build() (unmarshaler *RealHTMLUnmarshaler, err error) {
 	if err = builder.initRoot(); err == nil {
 		if err = builder.parseType(); err == nil {
 			if err = builder.checkBeforeReturn(); err == nil {
-				unmarshaler = &HTMLUnmarshaler{
+				unmarshaler = &RealHTMLUnmarshaler{
 					dto:         builder.dto,
 					kind:        builder.kind,
 					dtoElemType: builder.dtoElemType,
@@ -72,27 +72,27 @@ func (builder *HTMLUnmarshalerBuilder) Build() (unmarshaler *HTMLUnmarshaler, er
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) setDto(v reflect.Value) *HTMLUnmarshalerBuilder {
+func (builder *RealRealHTMLUnmarshalerBuilder) setDto(v reflect.Value) *RealRealHTMLUnmarshalerBuilder {
 	builder.dto = v
 	return builder
 }
 
-func (builder *HTMLUnmarshalerBuilder) setSelector(selector string) *HTMLUnmarshalerBuilder {
+func (builder *RealRealHTMLUnmarshalerBuilder) setSelector(selector string) *RealRealHTMLUnmarshalerBuilder {
 	builder.selector = selector
 	return builder
 }
 
-func (builder *HTMLUnmarshalerBuilder) setAttrKey(attrKey string) *HTMLUnmarshalerBuilder {
+func (builder *RealRealHTMLUnmarshalerBuilder) setAttrKey(attrKey string) *RealRealHTMLUnmarshalerBuilder {
 	builder.attrKey = attrKey
 	return builder
 }
 
-func (builder *HTMLUnmarshalerBuilder) setSelection(selection *goquery.Selection) *HTMLUnmarshalerBuilder {
+func (builder *RealRealHTMLUnmarshalerBuilder) setSelection(selection *goquery.Selection) *RealRealHTMLUnmarshalerBuilder {
 	builder.selection = selection
 	return builder
 }
 
-func (builder *HTMLUnmarshalerBuilder) initRoot() (err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) initRoot() (err error) {
 	if err = builder.checkDtoZero(); err == nil {
 		if value, ok := builder.dto.Interface().(HTMLModel); ok {
 			builder.selector = value.Root()
@@ -101,7 +101,7 @@ func (builder *HTMLUnmarshalerBuilder) initRoot() (err error) {
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) parseType() (err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) parseType() (err error) {
 	if err = builder.checkDtoZero(); err == nil {
 		dtoType := builder.dto.Type()
 		switch dtoType.Kind() {
@@ -116,7 +116,7 @@ func (builder *HTMLUnmarshalerBuilder) parseType() (err error) {
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) checkItemKind() (err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) checkItemKind() (err error) {
 	switch builder.kind {
 	case reflect.Ptr:
 	case reflect.Interface:
@@ -130,7 +130,7 @@ func (builder *HTMLUnmarshalerBuilder) checkItemKind() (err error) {
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
 	if err = builder.checkDtoZero(); err == nil {
 		if err = builder.checkItemKind(); err == nil {
 			err = builder.checkSelectionZero()
@@ -139,48 +139,48 @@ func (builder *HTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) checkDtoZero() (err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) checkDtoZero() (err error) {
 	if IsZero(builder.dto) {
 		err = errors.New(DtoZero)
 	}
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) checkSelectionZero() (err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) checkSelectionZero() (err error) {
 	if IsZero(builder.selection) {
 		err = errors.New(SelectionZero)
 	}
 	return
 }
 
-func (marshaler *HTMLUnmarshaler) getSelection() goquery.Selection {
+func (marshaler *RealHTMLUnmarshaler) getSelection() goquery.Selection {
 	return marshaler.selection
 }
 
-func (marshaler *HTMLUnmarshaler) getSelector() string {
+func (marshaler *RealHTMLUnmarshaler) getSelector() string {
 	return marshaler.selector
 }
 
-func (marshaler *HTMLUnmarshaler) getAttrKey() string {
+func (marshaler *RealHTMLUnmarshaler) getAttrKey() string {
 	return marshaler.attrKey
 }
 
-func (marshaler *HTMLUnmarshaler) getDto() reflect.Value {
+func (marshaler *RealHTMLUnmarshaler) getDto() reflect.Value {
 	return marshaler.dto
 }
 
-func (marshaler *HTMLUnmarshaler) getKind() reflect.Kind {
+func (marshaler *RealHTMLUnmarshaler) getKind() reflect.Kind {
 	return marshaler.kind
 }
 
-func (marshaler *HTMLUnmarshaler) getDtoElemType() reflect.Type {
+func (marshaler *RealHTMLUnmarshaler) getDtoElemType() reflect.Type {
 	return marshaler.dtoElemType
 }
 
-func (HTMLFooUnmarshaler) Unmarshal(data []byte, v interface{}) error {
+func (HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) error {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 	if err == nil {
-		realUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
+		realUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
 			setDto(reflect.ValueOf(v)).
 			setSelection(doc.Selection).
 			Build()
@@ -191,7 +191,7 @@ func (HTMLFooUnmarshaler) Unmarshal(data []byte, v interface{}) error {
 	return err
 }
 
-func (marshaler *HTMLUnmarshaler) unmarshal() (err error) {
+func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
 	preSelection := *marshaler.selection.Clone()
 	if marshaler.getKind() == reflect.Slice {
 		itemType := marshaler.getDtoElemType().Elem()
@@ -203,7 +203,7 @@ func (marshaler *HTMLUnmarshaler) unmarshal() (err error) {
 		}
 		preSelection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
 			newItem := reflect.New(itemType)
-			newUnmarshaler, buildErr := new(HTMLUnmarshalerBuilder).
+			newUnmarshaler, buildErr := new(RealRealHTMLUnmarshalerBuilder).
 				setDto(newItem).
 				setSelection(selection).
 				Build()
@@ -235,7 +235,7 @@ func (marshaler *HTMLUnmarshaler) unmarshal() (err error) {
 			for i := 0; i < motherValue.NumField(); i++ {
 				fieldPtr := motherValue.Field(i).Addr()
 				tag := motherType.Field(i).Tag
-				newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
+				newUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
 					setDto(fieldPtr).
 					setSelection(&preSelection).
 					setSelector(tag.Get(SelectorKey)).
@@ -300,7 +300,7 @@ func (marshaler *HTMLUnmarshaler) unmarshal() (err error) {
 	return err
 }
 
-func (marshaler *HTMLUnmarshaler) getAttrValue(selection goquery.Selection) (valueStr string) {
+func (marshaler *RealHTMLUnmarshaler) getAttrValue(selection goquery.Selection) (valueStr string) {
 	if marshaler.getAttrKey() == ZeroStr {
 		valueStr = selection.Text()
 	} else {

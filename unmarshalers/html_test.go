@@ -128,7 +128,7 @@ func TestHTMLUnmarshaler_Unmarshal(t *testing.T) {
 	TestHTML, err := ioutil.ReadFile("testFiles/courses.html")
 	assert.Nil(t, err)
 	courses := make(Courses, 0)
-	assert.Nil(t, new(HTMLFooUnmarshaler).Unmarshal(TestHTML, &courses))
+	assert.Nil(t, new(HTMLUnmarshaler).Unmarshal(TestHTML, &courses))
 	result, err := json.Marshal(courses)
 	assert.Nil(t, err)
 	assert.Equal(t, CoursesJSON, string(result))
@@ -136,7 +136,7 @@ func TestHTMLUnmarshaler_Unmarshal(t *testing.T) {
 	AllTypeHTML, err := ioutil.ReadFile("testFiles/all-type.html")
 	assert.Nil(t, err)
 	allTypes := AllTypeTest{}
-	assert.Nil(t, new(HTMLFooUnmarshaler).Unmarshal(AllTypeHTML, &allTypes))
+	assert.Nil(t, new(HTMLUnmarshaler).Unmarshal(AllTypeHTML, &allTypes))
 	result, err = json.Marshal(&allTypes)
 	assert.Nil(t, err)
 	fmt.Println(string(result))
