@@ -25,6 +25,8 @@ type (
 const (
 	SelectorKey    = "html"
 	AttrKey        = "key"
+	ZeroInt        = 0
+	ZeroStr        = ""
 	DefaultAttrKey = AttrText
 )
 
@@ -59,11 +61,7 @@ func (marshaler *HTMLUnmarshaler) getSelector() string {
 }
 
 func (marshaler *HTMLUnmarshaler) getAttrKey() string {
-	result := marshaler.attrKey
-	if result == "" {
-		result = DefaultAttrKey
-	}
-	return result
+	return marshaler.attrKey
 }
 
 func (marshaler *HTMLUnmarshaler) getDto() reflect.Value {
@@ -115,9 +113,9 @@ func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value 
 		}
 
 		if err == nil {
-			if marshaler.getSelector() != "" {
+			if marshaler.getSelector() != ZeroStr {
 				selection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
-					if i == 0 {
+					if i == ZeroInt {
 						preSelection = selection
 					}
 				})
@@ -222,7 +220,7 @@ func (marshaler *HTMLUnmarshaler) checkItemKind() (err error) {
 }
 
 func (marshaler *HTMLUnmarshaler) getAttrValue(selection *goquery.Selection) (valueStr string) {
-	if marshaler.getAttrKey() == AttrText {
+	if marshaler.getAttrKey() == ZeroStr {
 		valueStr = selection.Text()
 	} else {
 		if str, exist := selection.Attr(marshaler.getAttrKey()); exist {
