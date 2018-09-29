@@ -127,7 +127,7 @@ func (builder *RealRealHTMLUnmarshalerBuilder) checkItemKind() error {
 func (builder *RealRealHTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
 	if err = builder.checkDtoZero(); err == nil {
 		if err = builder.checkItemKind(); err == nil {
-			err = builder.checkSelectionZero()
+			err = builder.checkSelectionNil()
 		}
 	}
 	return
@@ -140,9 +140,9 @@ func (builder *RealRealHTMLUnmarshalerBuilder) checkDtoZero() (err error) {
 	return
 }
 
-func (builder *RealRealHTMLUnmarshalerBuilder) checkSelectionZero() (err error) {
-	if IsZero(builder.selection) {
-		err = errors.New(SelectionZero)
+func (builder *RealRealHTMLUnmarshalerBuilder) checkSelectionNil() (err error) {
+	if builder.selection == nil {
+		err = errors.New(SelectionNil)
 	}
 	return
 }
