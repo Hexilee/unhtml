@@ -47,7 +47,21 @@ const (
 	AttrSrc  = "src"
 )
 
-func (builder *RealRealHTMLUnmarshalerBuilder) Build() (unmarshaler *RealHTMLUnmarshaler, err error) {
+func (HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) error {
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
+	if err == nil {
+		realUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
+			setDto(reflect.ValueOf(v)).
+			setSelection(doc.Selection).
+			build()
+		if err = buildErr; err == nil {
+			err = realUnmarshal.unmarshal()
+		}
+	}
+	return err
+}
+
+func (builder *RealRealHTMLUnmarshalerBuilder) build() (unmarshaler *RealHTMLUnmarshaler, err error) {
 	if err = builder.initRoot(); err == nil {
 		if err = builder.parseType(); err == nil {
 			if err = builder.checkBeforeReturn(); err == nil {
@@ -171,20 +185,6 @@ func (marshaler RealHTMLUnmarshaler) getDtoElemType() reflect.Type {
 	return marshaler.dtoElemType
 }
 
-func (HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) error {
-	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
-	if err == nil {
-		realUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
-			setDto(reflect.ValueOf(v)).
-			setSelection(doc.Selection).
-			Build()
-		if err = buildErr; err == nil {
-			err = realUnmarshal.unmarshal()
-		}
-	}
-	return err
-}
-
 func (marshaler RealHTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) (err error) {
 	itemType := marshaler.getDtoElemType().Elem()
 	sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
@@ -193,7 +193,7 @@ func (marshaler RealHTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selecti
 		newUnmarshaler, buildErr := new(RealRealHTMLUnmarshalerBuilder).
 			setDto(newItem).
 			setSelection(selection).
-			Build()
+			build()
 		if err = buildErr; err == nil {
 			if err = newUnmarshaler.unmarshal(); err == nil {
 				sliceValue = reflect.Append(sliceValue, newItem.Elem())
@@ -215,7 +215,7 @@ func (marshaler RealHTMLUnmarshaler) unmarshalStruct(preSelection goquery.Select
 			setSelection(&preSelection).
 			setSelector(tag.Get(SelectorKey)).
 			setAttrKey(tag.Get(AttrKey)).
-			Build()
+			build()
 		if err = buildErr; err != nil {
 			break
 		}

@@ -12,30 +12,7 @@ const (
 	AllTypesJSON = `{"Slice":[0,1,2,3],"Struct":{"Name":"Hexilee","Age":20,"LikeLemon":true},"String":"Hello World!","Int":10,"Int8":10,"Int16":10,"Int32":10,"Int64":10,"Uint":10,"Uint8":10,"Uint16":10,"Uint32":10,"Uint64":10,"Float32":3.14,"Float64":3.14,"Bool":true}`
 )
 
-var (
-//htmlTestStruct = HtmlTestStruct{
-//	Interface: 0,
-//	Chan:      make(chan int, 0),
-//	Func: func() {
-//
-//	},
-//	Map: make(map[string]string),
-//}
-
-//InterfaceAddr = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Interface").Addr().Interface()
-//ChanAddr      = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Chan").Addr().Interface()
-//FuncAddr      = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Func").Addr().Interface()
-//MapAddr       = reflect.ValueOf(&htmlTestStruct).Elem().FieldByName("Map").Addr().Interface()
-)
-
 type (
-	//HtmlTestStruct struct {
-	//	Interface interface{}
-	//	Chan      chan int
-	//	Func      func()
-	//	Map       map[string]string
-	//}
-
 	Link struct {
 		Text string `json:"text"`
 		Href string `key:"href" json:"href"`
@@ -85,43 +62,6 @@ func (courses Courses) Root() string {
 func (AllTypeTest) Root() string {
 	return "#test"
 }
-
-//func TestHTMLMarshaler_parseType(t *testing.T) {
-//	var (
-//		Int      = 0
-//		IntPtr   = &Int
-//		IntSlice = make([]int, 0)
-//	)
-//
-//	for _, testCase := range []*struct {
-//		dto      interface{}
-//		kind     reflect.Kind
-//		itemType reflect.Type
-//		err      error
-//	}{
-//		{&IntSlice, reflect.Slice, reflect.TypeOf(IntSlice), nil},
-//		{Int, 0, nil, errors.New(UnmarshaledKindMustBePtr)},
-//		{IntPtr, reflect.Int, reflect.TypeOf(Int), nil},
-//		{&IntPtr, reflect.Ptr, reflect.TypeOf(IntPtr), errors.New(UnmarshalerItemKindError)},
-//		{InterfaceAddr, reflect.Interface, reflect.TypeOf(InterfaceAddr).Elem(), errors.New(UnmarshalerItemKindError)},
-//		{ChanAddr, reflect.Chan, reflect.TypeOf(ChanAddr).Elem(), errors.New(UnmarshalerItemKindError)},
-//		{FuncAddr, reflect.Func, reflect.TypeOf(FuncAddr).Elem(), errors.New(UnmarshalerItemKindError)},
-//		{MapAddr, reflect.Map, reflect.TypeOf(MapAddr).Elem(), errors.New(UnmarshalerItemKindError)},
-//	} {
-//		func() {
-//			builder := new(HTMLUnmarshalerBuilder).setDto(reflect.ValueOf(testCase.dto))
-//
-//			parseErr := builder.
-//			if parseErr != nil && testCase.err != nil {
-//				assert.Equal(t, testCase.err.Error(), parseErr.Error())
-//			} else {
-//				assert.Equal(t, testCase.err, parseErr)
-//			}
-//			assert.Equal(t, testCase.kind, result.kind)
-//			assert.Equal(t, testCase.itemType, result.dtoElemType)
-//		}()
-//	}
-//}
 
 func TestHTMLUnmarshaler_Unmarshal(t *testing.T) {
 	TestHTML, err := ioutil.ReadFile("testFiles/courses.html")
