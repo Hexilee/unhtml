@@ -185,10 +185,10 @@ func (HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) error {
 	return err
 }
 
-func (marshaler *RealHTMLUnmarshaler) unmarshalSlice() (err error) {
+func (marshaler *RealHTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) (err error) {
 	itemType := marshaler.getDtoElemType().Elem()
 	sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
-	marshaler.selection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
+	preSelection.Each(func(i int, selection *goquery.Selection) {
 		newItem := reflect.New(itemType)
 		newUnmarshaler, buildErr := new(RealRealHTMLUnmarshalerBuilder).
 			setDto(newItem).
@@ -204,34 +204,38 @@ func (marshaler *RealHTMLUnmarshaler) unmarshalSlice() (err error) {
 	return err
 }
 
+func (marshaler *RealHTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection) (err error) {
+	motherValue := marshaler.getDto().Elem()
+	motherType := marshaler.getDtoElemType()
+	for i := 0; i < motherValue.NumField(); i++ {
+		fieldPtr := motherValue.Field(i).Addr()
+		tag := motherType.Field(i).Tag
+		newUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
+			setDto(fieldPtr).
+			setSelection(&preSelection).
+			setSelector(tag.Get(SelectorKey)).
+			setAttrKey(tag.Get(AttrKey)).
+			Build()
+		if err = buildErr; err != nil {
+			break
+		}
+		if err = newUnmarshal.unmarshal(); err != nil {
+			break
+		}
+	}
+	return
+}
+
 func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
 	preSelection := marshaler.selection
 	if marshaler.getSelector() != ZeroStr {
 		preSelection = *marshaler.selection.Find(marshaler.getSelector())
 	}
-
 	switch marshaler.getKind() {
 	case reflect.Slice:
-		err = marshaler.unmarshalSlice()
+		err = marshaler.unmarshalSlice(preSelection)
 	case reflect.Struct:
-		motherValue := marshaler.getDto().Elem()
-		motherType := marshaler.getDtoElemType()
-		for i := 0; i < motherValue.NumField(); i++ {
-			fieldPtr := motherValue.Field(i).Addr()
-			tag := motherType.Field(i).Tag
-			newUnmarshal, buildErr := new(RealRealHTMLUnmarshalerBuilder).
-				setDto(fieldPtr).
-				setSelection(&preSelection).
-				setSelector(tag.Get(SelectorKey)).
-				setAttrKey(tag.Get(AttrKey)).
-				Build()
-			if err = buildErr; err != nil {
-				break
-			}
-			if err = newUnmarshal.unmarshal(); err != nil {
-				break
-			}
-		}
+		err = marshaler.unmarshalStruct(preSelection)
 	case reflect.String:
 		marshaler.getDto().Elem().SetString(marshaler.getAttrValue(preSelection))
 	case reflect.Int:
