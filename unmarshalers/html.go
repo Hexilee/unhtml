@@ -27,12 +27,10 @@ const (
 	AttrKey        = "key"
 	ZeroInt        = 0
 	ZeroStr        = ""
-	DefaultAttrKey = AttrText
 )
 
 const (
 	AttrHref = "href"
-	AttrText = "text"
 	AttrSrc  = "src"
 )
 
