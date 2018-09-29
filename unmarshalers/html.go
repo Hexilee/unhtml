@@ -148,7 +148,7 @@ func (builder *RealRealHTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
 }
 
 func (builder *RealRealHTMLUnmarshalerBuilder) checkDtoZero() (err error) {
-	if IsZero(builder.dto) {
+	if isZero(builder.dto) {
 		err = errors.New(DtoZero)
 	}
 	return
