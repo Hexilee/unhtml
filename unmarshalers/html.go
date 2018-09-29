@@ -47,13 +47,6 @@ const (
 	AttrSrc  = "src"
 )
 
-//func NewRealHTMLUnmarshaler(selection goquery.Selection, tag reflect.StructTag) *RealHTMLUnmarshaler {
-//	selector := tag.Get(SelectorKey)
-//	attrKey := tag.Get(AttrKey)
-//
-//	return &RealHTMLUnmarshaler{selection: selection, selector: selector, attrKey: attrKey}
-//}
-
 func (builder *RealRealHTMLUnmarshalerBuilder) Build() (unmarshaler *RealHTMLUnmarshaler, err error) {
 	if err = builder.initRoot(); err == nil {
 		if err = builder.parseType(); err == nil {
@@ -116,18 +109,19 @@ func (builder *RealRealHTMLUnmarshalerBuilder) parseType() (err error) {
 	return
 }
 
-func (builder *RealRealHTMLUnmarshalerBuilder) checkItemKind() (err error) {
+func (builder *RealRealHTMLUnmarshalerBuilder) checkItemKind() error {
+	err := errors.New(UnmarshalerItemKindError)
 	switch builder.kind {
 	case reflect.Ptr:
+	case reflect.Uintptr:
 	case reflect.Interface:
 	case reflect.Chan:
 	case reflect.Func:
 	case reflect.Map:
 	default:
-		return
+		err = nil
 	}
-	err = errors.New(UnmarshalerItemKindError)
-	return
+	return err
 }
 
 func (builder *RealRealHTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
@@ -264,8 +258,6 @@ func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
 			if err == nil {
 				marshaler.getDto().Elem().SetInt(int64(value))
 			}
-		case reflect.Uintptr:
-			fallthrough
 		case reflect.Uint:
 			fallthrough
 		case reflect.Uint8:
