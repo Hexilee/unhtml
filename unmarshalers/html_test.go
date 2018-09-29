@@ -95,31 +95,32 @@ func BenchmarkUnmarshalCourse(b *testing.B) {
 }
 
 func getLink(t assert.TestingT, selection *goquery.Selection) Link {
-	link, exist := selection.Attr(AttrHref)
-	assert.True(t, exist)
+	link, _ := selection.Attr(AttrHref)
 	return Link{Text: selection.Text(), Href: link}
 }
 
-func parseHTMLLogically(t assert.TestingT) Courses {
+func parseHTMLLogically(t assert.TestingT) (Courses, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(CourseHTML))
-	assert.Nil(t, err)
 	courses := make(Courses, 0)
-	doc.Find(courses.Root()).Each(func(i int, selection *goquery.Selection) {
-		course := Course{}
-		course.Code = getLink(t, selection.Find(`td:nth-child(1) > a`))
-		course.Name = getLink(t, selection.Find(`td:nth-child(2) > a`))
-		course.Teacher = getLink(t, selection.Find(`td:nth-child(3) > a`))
-		course.Semester = selection.Find(`td:nth-child(4)`).Text()
-		course.Time = selection.Find(`td:nth-child(5)`).Text()
-		course.Location = selection.Find(`td:nth-child(6)`).Text()
-		courses = append(courses, course)
-	})
-	return courses
+	if err == nil {
+		doc.Find(courses.Root()).Each(func(i int, selection *goquery.Selection) {
+			course := Course{}
+			course.Code = getLink(t, selection.Find(`td:nth-child(1) > a`))
+			course.Name = getLink(t, selection.Find(`td:nth-child(2) > a`))
+			course.Teacher = getLink(t, selection.Find(`td:nth-child(3) > a`))
+			course.Semester = selection.Find(`td:nth-child(4)`).Text()
+			course.Time = selection.Find(`td:nth-child(5)`).Text()
+			course.Location = selection.Find(`td:nth-child(6)`).Text()
+			courses = append(courses, course)
+		})
+	}
+
+	return courses, err
 }
 
 func BenchmarkParseHTMLLogically(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		courses := parseHTMLLogically(b)
-		assert.Equal(b, 9, len(courses))
+		_, err := parseHTMLLogically(b)
+		assert.Nil(b, err)
 	}
 }
