@@ -185,34 +185,35 @@ func (HTMLUnmarshaler) Unmarshal(data []byte, v interface{}) error {
 	return err
 }
 
-func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
-	preSelection := *marshaler.selection.Clone()
-	if marshaler.getKind() == reflect.Slice {
-		itemType := marshaler.getDtoElemType().Elem()
-		isItemTypePtr := itemType.Kind() == reflect.Ptr
-		sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
+func (marshaler *RealHTMLUnmarshaler) unmarshalSlice() (err error) {
+	itemType := marshaler.getDtoElemType().Elem()
+	isItemTypePtr := itemType.Kind() == reflect.Ptr
+	sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
 
-		if isItemTypePtr {
-			itemType = itemType.Elem()
-		}
-		preSelection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
-			newItem := reflect.New(itemType)
-			newUnmarshaler, buildErr := new(RealRealHTMLUnmarshalerBuilder).
-				setDto(newItem).
-				setSelection(selection).
-				Build()
-			if err = buildErr; err == nil {
-				if err = newUnmarshaler.unmarshal(); err == nil {
-					if !isItemTypePtr {
-						newItem = newItem.Elem()
-					}
-					sliceValue = reflect.Append(sliceValue, newItem)
-				}
-			}
-		})
-		marshaler.getDto().Elem().Set(sliceValue)
+	if isItemTypePtr {
+		itemType = itemType.Elem()
 	}
+	marshaler.selection.Find(marshaler.getSelector()).Each(func(i int, selection *goquery.Selection) {
+		newItem := reflect.New(itemType)
+		newUnmarshaler, buildErr := new(RealRealHTMLUnmarshalerBuilder).
+			setDto(newItem).
+			setSelection(selection).
+			Build()
+		if err = buildErr; err == nil {
+			if err = newUnmarshaler.unmarshal(); err == nil {
+				if !isItemTypePtr {
+					newItem = newItem.Elem()
+				}
+				sliceValue = reflect.Append(sliceValue, newItem)
+			}
+		}
+	})
+	marshaler.getDto().Elem().Set(sliceValue)
+	return err
+}
 
+func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
+	preSelection := marshaler.selection
 	if err == nil {
 		if marshaler.getSelector() != ZeroStr {
 			marshaler.selection.Find(marshaler.getSelector()).Each(func(i int, newSelection *goquery.Selection) {
@@ -223,6 +224,8 @@ func (marshaler *RealHTMLUnmarshaler) unmarshal() (err error) {
 		}
 
 		switch marshaler.getKind() {
+		case reflect.Slice:
+			err = marshaler.unmarshalSlice()
 		case reflect.Struct:
 			motherValue := marshaler.getDto().Elem()
 			motherType := marshaler.getDtoElemType()
