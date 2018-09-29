@@ -130,7 +130,7 @@ func (marshaler *HTMLUnmarshaler) unmarshal(selection *goquery.Selection, value 
 				for i := 0; i < motherValue.NumField(); i++ {
 					fieldPtr := motherValue.Field(i).Addr()
 					tag := motherType.Field(i).Tag
-					err = NewHTMLUnmarshaler(tag).unmarshal(selection, fieldPtr)
+					err = NewHTMLUnmarshaler(tag).unmarshal(preSelection, fieldPtr)
 					if err != nil {
 						break
 					}

@@ -1,6 +1,7 @@
 package unmarshalers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -39,12 +40,12 @@ type (
 	}
 
 	Course struct {
-		Code Link
-		Name Link
-		Teacher Link
-		Semester string
-		Time string
-		Location string
+		Code     Link   `html:"td:nth-child(1) > a"`
+		Name     Link   `html:"td:nth-child(2) > a"`
+		Teacher  Link   `html:"td:nth-child(3) > a"`
+		Semester string `html:"td:nth-child(4)";key:"text"`
+		Time     string `html:"td:nth-child(5)";key:"text"`
+		Location string `html:"td:nth-child(6)";key:"text"`
 	}
 
 	Courses []Course
@@ -95,6 +96,7 @@ func TestHTMLUnmarshaler_Unmarshal(t *testing.T) {
 	assert.Nil(t, err)
 	courses := make(Courses, 0)
 	assert.Nil(t, new(HTMLUnmarshaler).Unmarshal(TestHTML, &courses))
-
-	fmt.Println(courses)
+	result, err := json.Marshal(courses)
+	assert.Nil(t, err)
+	fmt.Println(string(result))
 }
