@@ -6,3 +6,9 @@ import "reflect"
 func isZero(v interface{}) bool {
 	return v == reflect.Zero(reflect.TypeOf(v)).Interface()
 }
+
+// Converter: Func (inputType) -> (resultType, error)
+func checkConverter(methodType reflect.Method, expectResultType reflect.Type) (inputType reflect.Type, err error) {
+
+	return
+}

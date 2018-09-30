@@ -34,10 +34,11 @@ type (
 )
 
 const (
-	SelectorKey = "html"
-	AttrKey     = "key"
-	ZeroInt     = 0
-	ZeroStr     = ""
+	SelectorKey  = "html"
+	AttrKey      = "key"
+	ConverterKey = "converter"
+	ZeroInt      = 0
+	ZeroStr      = ""
 )
 
 const (
@@ -215,17 +216,52 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 	for i := 0; i < motherValue.NumField(); i++ {
 		fieldPtr := motherValue.Field(i).Addr()
 		tag := motherType.Field(i).Tag
-		newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
-			setDto(fieldPtr).
-			setSelection(&preSelection).
-			setSelector(tag.Get(SelectorKey)).
-			setAttrKey(tag.Get(AttrKey)).
-			build()
-		if err = buildErr; err != nil {
-			break
-		}
-		if err = newUnmarshal.unmarshal(); err != nil {
-			break
+		if converter := tag.Get(ConverterKey); converter != ZeroStr {
+			method, exist := motherType.MethodByName(converter)
+			if !exist {
+				err = &ConverterNotExistError{converter}
+				break
+			}
+			inputType, converterTypeErr := checkConverter(method, motherType.Field(i).Type)
+			if converterTypeErr != nil {
+				err = converterTypeErr
+				break
+			}
+
+			inputValuePtr := reflect.New(inputType)
+			newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
+				setDto(inputValuePtr).
+				setSelection(&preSelection).
+				setSelector(tag.Get(SelectorKey)).
+				setAttrKey(tag.Get(AttrKey)).
+				build()
+
+			if err = buildErr; err != nil {
+				break
+			}
+			if err = newUnmarshal.unmarshal(); err != nil {
+				break
+			}
+
+			methodValue := motherValue.MethodByName(converter)
+			results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
+			if err = results[1].Interface().(error); err!= nil {
+				break
+			}
+			fieldPtr.Elem().Set(results[0])
+		} else {
+			newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
+				setDto(fieldPtr).
+				setSelection(&preSelection).
+				setSelector(tag.Get(SelectorKey)).
+				setAttrKey(tag.Get(AttrKey)).
+				build()
+			if err = buildErr; err != nil {
+				break
+			}
+			if err = newUnmarshal.unmarshal(); err != nil {
+				break
+			}
 		}
 	}
 	return
