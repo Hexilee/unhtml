@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	// HTMLUnmarshalerBuilder: all methods is private
+	// HTMLUnmarshalerBuilder: inner hidden
 	HTMLUnmarshalerBuilder struct {
 		dto         reflect.Value
 		kind        reflect.Kind
@@ -18,7 +18,7 @@ type (
 		attrKey     string
 	}
 
-	// HTMLUnmarshaler: all methods is private
+	// HTMLUnmarshaler: inner hidden
 	HTMLUnmarshaler struct {
 		dto         reflect.Value
 		kind        reflect.Kind
@@ -28,7 +28,9 @@ type (
 		attrKey     string
 	}
 
+	// HTMLModel: HTML model with root selector
 	HTMLModel interface {
+		// Root return root selector
 		Root() string
 	}
 )
@@ -37,13 +39,11 @@ const (
 	SelectorKey  = "html"
 	AttrKey      = "key"
 	ConverterKey = "converter"
-	ZeroInt      = 0
 	ZeroStr      = ""
 )
 
 const (
 	AttrHref = "href"
-	AttrSrc  = "src"
 )
 
 func Unmarshal(data []byte, v interface{}) error {
