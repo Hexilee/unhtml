@@ -148,6 +148,7 @@ func (builder *HTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
 }
 
 func (builder *HTMLUnmarshalerBuilder) checkDtoZero() (err error) {
+	// Zero reflect.Value
 	if isZero(builder.dto) {
 		err = errors.New(DtoZero)
 	}
