@@ -49,13 +49,21 @@ const (
 func Unmarshal(data []byte, v interface{}) error {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
 	if err == nil {
-		realUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
-			setDto(reflect.ValueOf(v)).
-			setSelection(doc.Selection).
-			build()
-		if err = buildErr; err == nil {
-			err = realUnmarshal.unmarshal()
-		}
+		err = unmarshal(reflect.ValueOf(v), *doc.Selection, "")
+	}
+	return err
+}
+
+func unmarshal(ptr reflect.Value, selection goquery.Selection, tag reflect.StructTag) (err error) {
+	realUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
+		setDto(ptr).
+		setSelection(&selection).
+		setSelector(tag.Get(SelectorKey)).
+		setAttrKey(tag.Get(AttrKey)).
+		build()
+
+	if err = buildErr; err == nil {
+		err = realUnmarshal.unmarshal()
 	}
 	return err
 }
