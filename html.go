@@ -9,6 +9,7 @@ import (
 )
 
 type (
+	// HTMLUnmarshalerBuilder: all methods is private
 	HTMLUnmarshalerBuilder struct {
 		dto         reflect.Value
 		kind        reflect.Kind
@@ -18,6 +19,7 @@ type (
 		attrKey     string
 	}
 
+	// HTMLUnmarshaler: all methods is private
 	HTMLUnmarshaler struct {
 		dto         reflect.Value
 		kind        reflect.Kind
