@@ -3,6 +3,7 @@ package unhtml
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -13,6 +14,7 @@ import (
 const (
 	CoursesJSON  = `[{"code":{"text":"061B0020","href":"#"},"name":{"text":"复变函数与积分变换","href":"#"},"teacher":{"text":"王伟","href":"#"},"semester":"秋","time":"周一第1,2节周四第1,2节","location":"紫金港西2-205(多)紫金港西2-205(多)"},{"code":{"text":"101C0350","href":"#"},"name":{"text":"电路与模拟电子技术","href":"#"},"teacher":{"text":"孙盾","href":"#"},"semester":"秋冬","time":"周二第6,7节周二第8节{单周}周五第3,4,5节","location":"紫金港西1-417(多)紫金港西1-417(多)紫金港西1-417(多)"},{"code":{"text":"101C0360","href":"#"},"name":{"text":"电路与模拟电子技术实验","href":"#"},"teacher":{"text":"干于","href":"#"},"semester":"秋冬","time":"周四第3,4,5节","location":"紫金港东3-202"},{"code":{"text":"241L0020","href":"#"},"name":{"text":"博弈论基础","href":"#"},"teacher":{"text":"蒋文华","href":"#"},"semester":"冬","time":"周三第6,7,8节","location":"紫金港西1-316(多)*"},{"code":{"text":"261C0070","href":"#"},"name":{"text":"工程力学","href":"#"},"teacher":{"text":"吴禹季葆华","href":"#"},"semester":"秋冬","time":"周二第1,2节{单周}周四第6,7节周四第8节{双周}","location":"紫金港西1-404(多)紫金港西1-404(多)紫金港西1-404(多)"},{"code":{"text":"74188020","href":"#"},"name":{"text":"专业实习","href":"#"},"teacher":{"text":"陈家旺黄豪彩","href":"#"},"semester":"短","time":" ","location":" "},{"code":{"text":"761T0010","href":"#"},"name":{"text":"大学物理（甲）Ⅰ","href":"#"},"teacher":{"text":"潘国卫","href":"#"},"semester":"秋冬","time":"周六第6,7,8,9节","location":"紫金港西2-101(多)"},{"code":{"text":"761T0020","href":"#"},"name":{"text":"大学物理（甲）Ⅱ","href":"#"},"teacher":{"text":"郑大方","href":"#"},"semester":"秋冬","time":"周一第3,4节周三第1,2节","location":"紫金港西2-202(多)#"},{"code":{"text":"821T0020","href":"#"},"name":{"text":"微积分（甲）Ⅱ","href":"#"},"teacher":{"text":"薛儒英","href":"#"},"semester":"秋冬","time":"周六第1,2,3,4节{单周}周六第1,2,3,4,5节{双周}","location":"紫金港西2-105(多)"}]`
 	AllTypesJSON = `{"Slice":[0,1,2,3],"Struct":{"Name":"Hexilee","Age":20,"LikeLemon":true},"String":"Hello World!","Int":10,"Int8":10,"Int16":10,"Int32":10,"Int64":10,"Uint":10,"Uint8":10,"Uint16":10,"Uint32":10,"Uint64":10,"Float32":3.14,"Float64":3.14,"Bool":true}`
+	TestError    = "test error"
 )
 
 var (
@@ -77,6 +79,10 @@ type (
 	ConverterTypeWrongTest struct {
 		Foo string `html:"div" converter:"WrongResultTypeMethod"`
 	}
+
+	ConverterReturnErrTest struct {
+		Foo []string `html:"#test > p:nth-child(3)" converter:"ReturnErrorMethod"`
+	}
 )
 
 func (Courses) Root() string {
@@ -105,6 +111,10 @@ func (ConverterTest) TestUserToMap(user TestUser) (map[string]interface{}, error
 
 func (ConverterTypeWrongTest) WrongResultTypeMethod(user TestUser) (Int int, err error) {
 	return
+}
+
+func (ConverterReturnErrTest) ReturnErrorMethod(input string) (result []string, err error) {
+	return []string{input}, errors.New(TestError)
 }
 
 func TestUnmarshal(t *testing.T) {
@@ -155,6 +165,12 @@ func TestConverter(t *testing.T) {
 	err = Unmarshal(AllTypeHTML, &converterTypeWrongTest)
 	assert.NotNil(t, err)
 	assert.Equal(t, NewConverterTypeWrongError("WrongResultTypeMethod", reflect.ValueOf(converterTypeWrongTest).MethodByName("WrongResultTypeMethod").Type()).Error(), err.Error())
+
+	assert.NotNil(t, AllTypeHTML)
+	converterReturnErrTest := ConverterReturnErrTest{}
+	err = Unmarshal(AllTypeHTML, &converterReturnErrTest)
+	assert.NotNil(t, err)
+	assert.Equal(t, TestError, err.Error())
 }
 
 func BenchmarkUnmarshalCourse(b *testing.B) {
