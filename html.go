@@ -204,14 +204,8 @@ func (marshaler HTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) 
 	sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
 	preSelection.Each(func(i int, selection *goquery.Selection) {
 		newItem := reflect.New(itemType)
-		newUnmarshaler, buildErr := new(HTMLUnmarshalerBuilder).
-			setDto(newItem).
-			setSelection(selection).
-			build()
-		if err = buildErr; err == nil {
-			if err = newUnmarshaler.unmarshal(); err == nil {
-				sliceValue = reflect.Append(sliceValue, newItem.Elem())
-			}
+		if err = unmarshal(newItem, *selection, ""); err == nil {
+			sliceValue = reflect.Append(sliceValue, newItem.Elem())
 		}
 	})
 	marshaler.getDto().Elem().Set(sliceValue)
@@ -222,9 +216,9 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 	motherValue := marshaler.getDto().Elem()
 	motherType := marshaler.getDtoElemType()
 	for i := 0; i < motherValue.NumField(); i++ {
-		index := i
-		fieldPtr := motherValue.Field(index).Addr()
-		tag := motherType.Field(index).Tag
+		fieldPtr := motherValue.Field(i).Addr()
+		tag := motherType.Field(i).Tag
+		resultType := motherType.Field(i).Type
 		if converter := tag.Get(ConverterKey); converter != ZeroStr {
 			method, exist := motherType.MethodByName(converter)
 			if !exist {
@@ -232,38 +226,21 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 			}
 			if err == nil {
 				methodValue := motherValue.MethodByName(converter)
-				inputValuePtr, converterTypeErr := checkConverter(method.Name, methodValue.Type(), motherType.Field(index).Type)
+				inputValuePtr, converterTypeErr := checkConverter(method.Name, methodValue.Type(), resultType)
 				if err = converterTypeErr; err == nil {
-					newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
-						setDto(inputValuePtr).
-						setSelection(&preSelection).
-						setSelector(tag.Get(SelectorKey)).
-						setAttrKey(tag.Get(AttrKey)).
-						build()
-
-					if err = buildErr; err == nil {
-						if err = newUnmarshal.unmarshal(); err == nil {
-							results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
-							if errInterface := results[1].Interface(); errInterface != nil {
-								err = errInterface.(error)
-							}
-							if err == nil {
-								fieldPtr.Elem().Set(results[0])
-							}
+					if err = unmarshal(inputValuePtr, preSelection, tag); err == nil {
+						results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
+						if errInterface := results[1].Interface(); errInterface != nil {
+							err = errInterface.(error)
+						}
+						if err == nil {
+							fieldPtr.Elem().Set(results[0])
 						}
 					}
 				}
 			}
 		} else {
-			newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
-				setDto(fieldPtr).
-				setSelection(&preSelection).
-				setSelector(tag.Get(SelectorKey)).
-				setAttrKey(tag.Get(AttrKey)).
-				build()
-			if err = buildErr; err == nil {
-				err = newUnmarshal.unmarshal()
-			}
+			err = unmarshal(fieldPtr, preSelection, tag)
 		}
 
 		if err != nil {
