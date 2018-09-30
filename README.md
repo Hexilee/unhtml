@@ -82,7 +82,7 @@ func (AllTypeTest) Root() string {
 
 func main() {
 	AllTypeHTML, _ := ioutil.ReadFile("testHTML/all-type.html")
-	allTypes := AllTypeTest{}
+	var allTypes unhtml.HTMLModel = AllTypeTest{}
 	_ := unhtml.Unmarshal(AllTypeHTML, &allTypes)
 	result, _ := json.Marshal(&allTypes)
 	fmt.Println(string(result))
