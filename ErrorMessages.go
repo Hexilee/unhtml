@@ -1,4 +1,4 @@
-package unmarshalers
+package unhtml
 
 const (
 	UnmarshaledKindMustBePtr = "unmarshaled kind must be Ptr"

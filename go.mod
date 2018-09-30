@@ -1,4 +1,4 @@
-module github.com/Hexilee/gotten/unmarshalers
+module github.com/Hexilee/unhtml
 
 require (
 	github.com/PuerkitoBio/goquery v1.4.1
