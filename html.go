@@ -214,41 +214,38 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 	motherValue := marshaler.getDto().Elem()
 	motherType := marshaler.getDtoElemType()
 	for i := 0; i < motherValue.NumField(); i++ {
-		fieldPtr := motherValue.Field(i).Addr()
-		tag := motherType.Field(i).Tag
+		index := i
+		fieldPtr := motherValue.Field(index).Addr()
+		tag := motherType.Field(index).Tag
 		if converter := tag.Get(ConverterKey); converter != ZeroStr {
 			method, exist := motherType.MethodByName(converter)
 			if !exist {
 				err = &ConverterNotExistError{converter}
-				break
 			}
-			methodValue := motherValue.MethodByName(converter)
-			inputValuePtr, converterTypeErr := checkConverter(method.Name, methodValue.Type(), motherType.Field(i).Type)
-			if converterTypeErr != nil {
-				err = converterTypeErr
-				break
-			}
+			if err == nil {
+				methodValue := motherValue.MethodByName(converter)
+				inputValuePtr, converterTypeErr := checkConverter(method.Name, methodValue.Type(), motherType.Field(index).Type)
+				if err = converterTypeErr; err == nil {
+					newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
+						setDto(inputValuePtr).
+						setSelection(&preSelection).
+						setSelector(tag.Get(SelectorKey)).
+						setAttrKey(tag.Get(AttrKey)).
+						build()
 
-			newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
-				setDto(inputValuePtr).
-				setSelection(&preSelection).
-				setSelector(tag.Get(SelectorKey)).
-				setAttrKey(tag.Get(AttrKey)).
-				build()
-
-			if err = buildErr; err != nil {
-				break
+					if err = buildErr; err == nil {
+						if err = newUnmarshal.unmarshal(); err == nil {
+							results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
+							if errInterface := results[1].Interface(); errInterface != nil {
+								err = errInterface.(error)
+							}
+							if err == nil {
+								fieldPtr.Elem().Set(results[0])
+							}
+						}
+					}
+				}
 			}
-			if err = newUnmarshal.unmarshal(); err != nil {
-				break
-			}
-
-			results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
-			if errInterface := results[1].Interface(); errInterface != nil {
-				err = errInterface.(error)
-				break
-			}
-			fieldPtr.Elem().Set(results[0])
 		} else {
 			newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
 				setDto(fieldPtr).
@@ -256,12 +253,13 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 				setSelector(tag.Get(SelectorKey)).
 				setAttrKey(tag.Get(AttrKey)).
 				build()
-			if err = buildErr; err != nil {
-				break
+			if err = buildErr; err == nil {
+				err = newUnmarshal.unmarshal()
 			}
-			if err = newUnmarshal.unmarshal(); err != nil {
-				break
-			}
+		}
+
+		if err != nil {
+			break
 		}
 	}
 	return
