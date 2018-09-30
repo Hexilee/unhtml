@@ -39,7 +39,7 @@ type (
 
 	AllTypeTest struct {
 		Slice   []int    `html:"ul > li"`
-		Struct  TestUser `html:"div"`
+		Struct  TestUser `html:"#test > div"`
 		String  string   `html:"#test > p:nth-child(3)"`
 		Int     int      `html:"#test > p:nth-child(4)"`
 		Int8    int8     `html:"#test > p:nth-child(4)"`
