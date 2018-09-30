@@ -76,10 +76,6 @@ type (
 	}
 )
 
-func (AllTypeTest) Root() string {
-	return "#test"
-}
-
 func main() {
 	AllTypeHTML, _ := ioutil.ReadFile("testHTML/all-type.html")
 	allTypes := AllTypeTest{}
