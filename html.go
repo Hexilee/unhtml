@@ -113,24 +113,28 @@ func (builder *HTMLUnmarshalerBuilder) parseType() (err error) {
 			builder.dtoElemType = dtoType.Elem()
 			builder.kind = builder.dtoElemType.Kind()
 		default:
-			err = errors.New(UnmarshaledKindMustBePtr)
+			err = UnmarshaledKindMustBePtrError{dtoType}
 		}
 	}
 
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) checkItemKind() error {
-	err := errors.New(UnmarshalerItemKindError)
+func (builder *HTMLUnmarshalerBuilder) checkItemKind() (err error) {
 	switch builder.kind {
 	case reflect.Ptr:
+		fallthrough
 	case reflect.Uintptr:
+		fallthrough
 	case reflect.Interface:
+		fallthrough
 	case reflect.Chan:
+		fallthrough
 	case reflect.Func:
+		fallthrough
 	case reflect.Map:
+		err = UnmarshalerItemKindError{builder.dtoElemType}
 	default:
-		err = nil
 	}
 	return err
 }

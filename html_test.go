@@ -6,6 +6,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"reflect"
 	"testing"
 )
 
@@ -91,7 +92,7 @@ func TestBuilderErr(t *testing.T) {
 	courses := make(Courses, 0)
 	err := Unmarshal(CourseHTML, courses)
 	assert.NotNil(t, err)
-	assert.Equal(t, UnmarshaledKindMustBePtr, err.Error())
+	assert.Equal(t, UnmarshaledKindMustBePtrError{reflect.TypeOf(courses)}.Error(), err.Error())
 }
 
 func BenchmarkUnmarshalCourse(b *testing.B) {
