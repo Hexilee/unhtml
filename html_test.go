@@ -15,8 +15,8 @@ const (
 )
 
 var (
-	CourseHTML, _  = ioutil.ReadFile("testFiles/courses.html")
-	AllTypeHTML, _ = ioutil.ReadFile("testFiles/all-type.html")
+	CourseHTML, _  = ioutil.ReadFile("testHTML/courses.html")
+	AllTypeHTML, _ = ioutil.ReadFile("testHTML/all-type.html")
 )
 
 type (
