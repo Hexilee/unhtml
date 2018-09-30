@@ -212,32 +212,43 @@ func (marshaler HTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) 
 	return err
 }
 
+func (marshaler HTMLUnmarshaler) callConverter(converter string, fieldIndex int, preSelection goquery.Selection) (result reflect.Value, err error) {
+	motherValue := marshaler.getDto().Elem()
+	motherType := marshaler.getDtoElemType()
+	tag := motherType.Field(fieldIndex).Tag
+	resultType := motherType.Field(fieldIndex).Type
+	method, exist := motherType.MethodByName(converter)
+	if !exist {
+		err = &ConverterNotExistError{converter}
+	}
+	if err == nil {
+		methodValue := motherValue.MethodByName(converter)
+		inputValuePtr, converterTypeErr := checkConverter(method.Name, methodValue.Type(), resultType)
+		if err = converterTypeErr; err == nil {
+			if err = unmarshal(inputValuePtr, preSelection, tag); err == nil {
+				results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
+				if errInterface := results[1].Interface(); errInterface != nil {
+					err = errInterface.(error)
+				}
+				if err == nil {
+					result = results[0]
+				}
+			}
+		}
+	}
+	return
+}
+
 func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection) (err error) {
 	motherValue := marshaler.getDto().Elem()
 	motherType := marshaler.getDtoElemType()
 	for i := 0; i < motherValue.NumField(); i++ {
 		fieldPtr := motherValue.Field(i).Addr()
 		tag := motherType.Field(i).Tag
-		resultType := motherType.Field(i).Type
 		if converter := tag.Get(ConverterKey); converter != ZeroStr {
-			method, exist := motherType.MethodByName(converter)
-			if !exist {
-				err = &ConverterNotExistError{converter}
-			}
-			if err == nil {
-				methodValue := motherValue.MethodByName(converter)
-				inputValuePtr, converterTypeErr := checkConverter(method.Name, methodValue.Type(), resultType)
-				if err = converterTypeErr; err == nil {
-					if err = unmarshal(inputValuePtr, preSelection, tag); err == nil {
-						results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
-						if errInterface := results[1].Interface(); errInterface != nil {
-							err = errInterface.(error)
-						}
-						if err == nil {
-							fieldPtr.Elem().Set(results[0])
-						}
-					}
-				}
+			result, callConverterErr := marshaler.callConverter(converter, i, preSelection)
+			if err = callConverterErr; err == nil {
+				fieldPtr.Elem().Set(result)
 			}
 		} else {
 			err = unmarshal(fieldPtr, preSelection, tag)
