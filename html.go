@@ -61,16 +61,15 @@ func Unmarshal(data []byte, v interface{}) error {
 func (builder *HTMLUnmarshalerBuilder) build() (unmarshaler *HTMLUnmarshaler, err error) {
 	if err = builder.initRoot(); err == nil {
 		if err = builder.parseType(); err == nil {
-			if err = builder.checkBeforeReturn(); err == nil {
-				unmarshaler = &HTMLUnmarshaler{
-					dto:         builder.dto,
-					kind:        builder.kind,
-					dtoElemType: builder.dtoElemType,
-					selection:   *builder.selection,
-					selector:    builder.selector,
-					attrKey:     builder.attrKey,
-				}
+			unmarshaler = &HTMLUnmarshaler{
+				dto:         builder.dto,
+				kind:        builder.kind,
+				dtoElemType: builder.dtoElemType,
+				selection:   *builder.selection,
+				selector:    builder.selector,
+				attrKey:     builder.attrKey,
 			}
+
 		}
 	}
 	return

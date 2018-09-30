@@ -6,7 +6,7 @@ import (
 
 const (
 	UnmarshaledKindMustBePtr = "unmarshaled kind must be Ptr"
-	UnmarshalerItemKind      = "unmarshaled elem cannot be Ptr/Interface/Chan/Func/"
+	UnmarshalerItemKind      = "unmarshaled elem cannot be Ptr/Uintptr/Interface/Chan/Func/"
 	DtoZero                  = "dto cannot be zero"
 	SelectionNil             = "selection cannot be nil"
 )
@@ -22,9 +22,9 @@ type (
 )
 
 func (err UnmarshaledKindMustBePtrError) Error() string {
-	return UnmarshaledKindMustBePtr + ": " + err.Type.Name()
+	return UnmarshaledKindMustBePtr + ": " + err.Type.String()
 }
 
 func (err UnmarshalerItemKindError) Error() string {
-	return UnmarshalerItemKind + ": " + err.Type.Name()
+	return UnmarshalerItemKind + ": " + err.Type.String()
 }

@@ -61,15 +61,24 @@ type (
 		Age       uint   `html:"p:nth-child(2)"`
 		LikeLemon bool   `html:"p:nth-child(3)"`
 	}
+
+	WrongTypes struct {
+		WrongStruct *TestUser `html:"div"`
+	}
 )
 
-func (courses Courses) Root() string {
+func (Courses) Root() string {
 	return "#xsgrid > tbody > tr:nth-child(1n+2)"
 }
 
 func (AllTypeTest) Root() string {
 	return "#test"
 }
+
+func (WrongTypes) Root() string {
+	return "#test"
+}
+
 
 func TestUnmarshal(t *testing.T) {
 	assert.NotNil(t, CourseHTML)
@@ -93,6 +102,14 @@ func TestBuilderErr(t *testing.T) {
 	err := Unmarshal(CourseHTML, courses)
 	assert.NotNil(t, err)
 	assert.Equal(t, UnmarshaledKindMustBePtrError{reflect.TypeOf(courses)}.Error(), err.Error())
+
+	assert.NotNil(t, AllTypeHTML)
+	wrongTypes := WrongTypes{}
+	err = Unmarshal(AllTypeHTML, &wrongTypes)
+	assert.NotNil(t, err)
+	assert.Equal(t, UnmarshalerItemKindError{reflect.TypeOf(new(TestUser))}.Error(), err.Error())
+
+
 }
 
 func BenchmarkUnmarshalCourse(b *testing.B) {
