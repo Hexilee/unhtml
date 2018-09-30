@@ -16,15 +16,15 @@ const (
 
 type (
 	UnmarshaledKindMustBePtrError struct {
-		Type reflect.Type
+		dtoType reflect.Type
 	}
 
 	UnmarshalerItemKindError struct {
-		Type reflect.Type
+		dtoType reflect.Type
 	}
 
 	ConverterNotExistError struct {
-		Name string
+		name string
 	}
 
 	ConverterTypeWrongError struct {
@@ -33,20 +33,32 @@ type (
 	}
 )
 
+func NewUnmarshaledKindMustBePtrError(dtoType reflect.Type) *UnmarshaledKindMustBePtrError {
+	return &UnmarshaledKindMustBePtrError{dtoType}
+}
+
+func NewUnmarshalerItemKindError(dtoType reflect.Type) *UnmarshalerItemKindError {
+	return &UnmarshalerItemKindError{dtoType}
+}
+
+func NewConverterNotExistError(name string) *ConverterNotExistError {
+	return &ConverterNotExistError{name}
+}
+
 func NewConverterTypeWrongError(name string, methodType reflect.Type) *ConverterTypeWrongError {
 	return &ConverterTypeWrongError{name, methodType}
 }
 
 func (err UnmarshaledKindMustBePtrError) Error() string {
-	return UnmarshaledKindMustBePtr + ": " + err.Type.String()
+	return UnmarshaledKindMustBePtr + ": " + err.dtoType.String()
 }
 
 func (err UnmarshalerItemKindError) Error() string {
-	return UnmarshalerItemKind + ": " + err.Type.String()
+	return UnmarshalerItemKind + ": " + err.dtoType.String()
 }
 
 func (err ConverterNotExistError) Error() string {
-	return ConverterNotExist + ": " + err.Name
+	return ConverterNotExist + ": " + err.name
 }
 
 func (err ConverterTypeWrongError) Error() string {

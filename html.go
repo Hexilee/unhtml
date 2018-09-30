@@ -123,7 +123,7 @@ func (builder *HTMLUnmarshalerBuilder) parseType() (err error) {
 		builder.dtoElemType = dtoType.Elem()
 		builder.kind = builder.dtoElemType.Kind()
 	default:
-		err = UnmarshaledKindMustBePtrError{dtoType}
+		err = NewUnmarshaledKindMustBePtrError(dtoType)
 	}
 	//}
 
@@ -143,7 +143,7 @@ func (builder *HTMLUnmarshalerBuilder) checkItemKind() (err error) {
 	case reflect.Func:
 		fallthrough
 	case reflect.Map:
-		err = UnmarshalerItemKindError{builder.dtoElemType}
+		err = NewUnmarshalerItemKindError(builder.dtoElemType)
 	default:
 	}
 	return
@@ -219,7 +219,7 @@ func (marshaler HTMLUnmarshaler) callConverter(converter string, fieldIndex int,
 	resultType := motherType.Field(fieldIndex).Type
 	method, exist := motherType.MethodByName(converter)
 	if !exist {
-		err = &ConverterNotExistError{converter}
+		err = NewConverterNotExistError(converter)
 	}
 	if err == nil {
 		methodValue := motherValue.MethodByName(converter)

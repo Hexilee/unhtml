@@ -116,13 +116,13 @@ func TestBuilderErr(t *testing.T) {
 	courses := make(Courses, 0)
 	err := Unmarshal(CourseHTML, courses)
 	assert.NotNil(t, err)
-	assert.Equal(t, UnmarshaledKindMustBePtrError{reflect.TypeOf(courses)}.Error(), err.Error())
+	assert.Equal(t, NewUnmarshaledKindMustBePtrError(reflect.TypeOf(courses)).Error(), err.Error())
 
 	assert.NotNil(t, AllTypeHTML)
 	wrongTypes := WrongTypes{}
 	err = Unmarshal(AllTypeHTML, &wrongTypes)
 	assert.NotNil(t, err)
-	assert.Equal(t, UnmarshalerItemKindError{reflect.TypeOf(new(TestUser))}.Error(), err.Error())
+	assert.Equal(t, NewUnmarshalerItemKindError(reflect.TypeOf(new(TestUser))).Error(), err.Error())
 
 }
 
