@@ -76,16 +76,16 @@ type (
 	}
 )
 
+func (AllTypeTest) Root() string {
+	return "#test"
+}
+
 func main() {
 	AllTypeHTML, _ := ioutil.ReadFile("testHTML/all-type.html")
 	allTypes := AllTypeTest{}
-	err := unhtml.Unmarshal(AllTypeHTML, &allTypes)
-	if err == nil {
-		result, err := json.Marshal(&allTypes)
-		if err == nil {
-			fmt.Println(result)
-		}
-	}
+	_ := unhtml.Unmarshal(AllTypeHTML, &allTypes)
+	result, _ := json.Marshal(&allTypes)
+	fmt.Println(string(result))
 }
 ```
 
