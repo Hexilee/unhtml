@@ -69,6 +69,14 @@ type (
 	ConverterTest struct {
 		ConvertedStruct map[string]interface{} `html:"div" converter:"TestUserToMap"`
 	}
+
+	ConverterNotExistTest struct {
+		Foo int `html:"div" converter:"NotExistMethod"`
+	}
+
+	ConverterTypeWrongTest struct {
+		Foo string `html:"div" converter:"WrongResultTypeMethod"`
+	}
 )
 
 func (Courses) Root() string {
@@ -93,6 +101,10 @@ func (ConverterTest) TestUserToMap(user TestUser) (map[string]interface{}, error
 		"age":        user.Age,
 		"like_lemon": user.LikeLemon,
 	}, nil
+}
+
+func (ConverterTypeWrongTest) WrongResultTypeMethod(user TestUser) (Int int, err error) {
+	return
 }
 
 func TestUnmarshal(t *testing.T) {
@@ -131,6 +143,18 @@ func TestConverter(t *testing.T) {
 	convertedStruct := ConverterTest{}
 	assert.Nil(t, Unmarshal(AllTypeHTML, &convertedStruct))
 	assert.Equal(t, "Hexilee", convertedStruct.ConvertedStruct["name"])
+
+	assert.NotNil(t, AllTypeHTML)
+	converterNotExistTest := ConverterNotExistTest{}
+	err := Unmarshal(AllTypeHTML, &converterNotExistTest)
+	assert.NotNil(t, err)
+	assert.Equal(t, NewConverterNotExistError("NotExistMethod").Error(), err.Error())
+
+	assert.NotNil(t, AllTypeHTML)
+	converterTypeWrongTest := ConverterTypeWrongTest{}
+	err = Unmarshal(AllTypeHTML, &converterTypeWrongTest)
+	assert.NotNil(t, err)
+	assert.Equal(t, NewConverterTypeWrongError("WrongResultTypeMethod", reflect.ValueOf(converterTypeWrongTest).MethodByName("WrongResultTypeMethod").Type()).Error(), err.Error())
 }
 
 func BenchmarkUnmarshalCourse(b *testing.B) {
