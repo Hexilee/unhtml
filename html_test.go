@@ -79,7 +79,6 @@ func (WrongTypes) Root() string {
 	return "#test"
 }
 
-
 func TestUnmarshal(t *testing.T) {
 	assert.NotNil(t, CourseHTML)
 	courses := make(Courses, 0)

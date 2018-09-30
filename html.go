@@ -2,7 +2,6 @@ package unhtml
 
 import (
 	"bytes"
-	"errors"
 	"github.com/PuerkitoBio/goquery"
 	"reflect"
 	"strconv"
@@ -99,25 +98,25 @@ func (builder *HTMLUnmarshalerBuilder) setSelection(selection *goquery.Selection
 }
 
 func (builder *HTMLUnmarshalerBuilder) initRoot() (err error) {
-	if err = builder.checkDtoZero(); err == nil {
-		if value, ok := builder.dto.Interface().(HTMLModel); ok {
-			builder.selector = value.Root()
-		}
+	//if err = builder.checkDtoZero(); err == nil {
+	if value, ok := builder.dto.Interface().(HTMLModel); ok {
+		builder.selector = value.Root()
 	}
+	//}
 	return
 }
 
 func (builder *HTMLUnmarshalerBuilder) parseType() (err error) {
-	if err = builder.checkDtoZero(); err == nil {
-		dtoType := builder.dto.Type()
-		switch dtoType.Kind() {
-		case reflect.Ptr:
-			builder.dtoElemType = dtoType.Elem()
-			builder.kind = builder.dtoElemType.Kind()
-		default:
-			err = UnmarshaledKindMustBePtrError{dtoType}
-		}
+	//if err = builder.checkDtoZero(); err == nil {
+	dtoType := builder.dto.Type()
+	switch dtoType.Kind() {
+	case reflect.Ptr:
+		builder.dtoElemType = dtoType.Elem()
+		builder.kind = builder.dtoElemType.Kind()
+	default:
+		err = UnmarshaledKindMustBePtrError{dtoType}
 	}
+	//}
 
 	return
 }
@@ -142,28 +141,30 @@ func (builder *HTMLUnmarshalerBuilder) checkItemKind() (err error) {
 }
 
 func (builder *HTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
-	if err = builder.checkDtoZero(); err == nil {
-		if err = builder.checkSelectionNil(); err == nil {
-			err = builder.checkItemKind()
-		}
-	}
+	//if err = builder.checkDtoZero(); err == nil {
+	//	if err = builder.checkSelectionNil(); err == nil {
+	err = builder.checkItemKind()
+	//}
+	//}
 	return
 }
 
-func (builder *HTMLUnmarshalerBuilder) checkDtoZero() (err error) {
-	// Zero reflect.Value
-	if isZero(builder.dto) {
-		err = errors.New(DtoZero)
-	}
-	return
-}
+// never return err in production env
+//func (builder *HTMLUnmarshalerBuilder) checkDtoZero() (err error) {
+//	// Zero reflect.Value
+//	if isZero(builder.dto) {
+//		err = errors.New(DtoZero)
+//	}
+//	return
+//}
 
-func (builder *HTMLUnmarshalerBuilder) checkSelectionNil() (err error) {
-	if builder.selection == nil {
-		err = errors.New(SelectionNil)
-	}
-	return
-}
+// never return err in production env
+//func (builder *HTMLUnmarshalerBuilder) checkSelectionNil() (err error) {
+//	if builder.selection == nil {
+//		err = errors.New(SelectionNil)
+//	}
+//	return
+//}
 
 func (marshaler HTMLUnmarshaler) getSelection() goquery.Selection {
 	return marshaler.selection
