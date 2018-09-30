@@ -3,3 +3,5 @@
 [![Build Status](https://travis-ci.org/Hexilee/unhtml.svg?branch=master)](https://travis-ci.org/Hexilee/unhtml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Hexilee/unhtml/blob/master/LICENSE)
 [![Documentation](https://godoc.org/github.com/Hexilee/unhtml?status.svg)](https://godoc.org/github.com/Hexilee/unhtml)
+
+### Example
