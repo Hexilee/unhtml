@@ -175,32 +175,32 @@ func (builder *HTMLUnmarshalerBuilder) checkBeforeReturn() (err error) {
 //	return
 //}
 
-func (marshaler HTMLUnmarshaler) getSelection() goquery.Selection {
-	return marshaler.selection
+func (unmarshaler HTMLUnmarshaler) getSelection() goquery.Selection {
+	return unmarshaler.selection
 }
 
-func (marshaler HTMLUnmarshaler) getSelector() string {
-	return marshaler.selector
+func (unmarshaler HTMLUnmarshaler) getSelector() string {
+	return unmarshaler.selector
 }
 
-func (marshaler HTMLUnmarshaler) getAttrKey() string {
-	return marshaler.attrKey
+func (unmarshaler HTMLUnmarshaler) getAttrKey() string {
+	return unmarshaler.attrKey
 }
 
-func (marshaler HTMLUnmarshaler) getDto() reflect.Value {
-	return marshaler.dto
+func (unmarshaler HTMLUnmarshaler) getDto() reflect.Value {
+	return unmarshaler.dto
 }
 
-func (marshaler HTMLUnmarshaler) getKind() reflect.Kind {
-	return marshaler.kind
+func (unmarshaler HTMLUnmarshaler) getKind() reflect.Kind {
+	return unmarshaler.kind
 }
 
-func (marshaler HTMLUnmarshaler) getDtoElemType() reflect.Type {
-	return marshaler.dtoElemType
+func (unmarshaler HTMLUnmarshaler) getDtoElemType() reflect.Type {
+	return unmarshaler.dtoElemType
 }
 
-func (marshaler HTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) (err error) {
-	itemType := marshaler.getDtoElemType().Elem()
+func (unmarshaler HTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) (err error) {
+	itemType := unmarshaler.getDtoElemType().Elem()
 	sliceValue := reflect.MakeSlice(reflect.SliceOf(itemType), 0, 0)
 	preSelection.Each(func(i int, selection *goquery.Selection) {
 		newItem := reflect.New(itemType)
@@ -208,13 +208,13 @@ func (marshaler HTMLUnmarshaler) unmarshalSlice(preSelection goquery.Selection) 
 			sliceValue = reflect.Append(sliceValue, newItem.Elem())
 		}
 	})
-	marshaler.getDto().Elem().Set(sliceValue)
+	unmarshaler.getDto().Elem().Set(sliceValue)
 	return err
 }
 
-func (marshaler HTMLUnmarshaler) callConverter(converter string, fieldIndex int, preSelection goquery.Selection) (result reflect.Value, err error) {
-	motherValue := marshaler.getDto().Elem()
-	motherType := marshaler.getDtoElemType()
+func (unmarshaler HTMLUnmarshaler) callConverter(converter string, fieldIndex int, preSelection goquery.Selection) (result reflect.Value, err error) {
+	motherValue := unmarshaler.getDto().Elem()
+	motherType := unmarshaler.getDtoElemType()
 	tag := motherType.Field(fieldIndex).Tag
 	resultType := motherType.Field(fieldIndex).Type
 	method, exist := motherType.MethodByName(converter)
@@ -239,14 +239,14 @@ func (marshaler HTMLUnmarshaler) callConverter(converter string, fieldIndex int,
 	return
 }
 
-func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection) (err error) {
-	motherValue := marshaler.getDto().Elem()
-	motherType := marshaler.getDtoElemType()
+func (unmarshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection) (err error) {
+	motherValue := unmarshaler.getDto().Elem()
+	motherType := unmarshaler.getDtoElemType()
 	for i := 0; i < motherValue.NumField(); i++ {
 		fieldPtr := motherValue.Field(i).Addr()
 		tag := motherType.Field(i).Tag
 		if converter := tag.Get(ConverterKey); converter != ZeroStr {
-			result, callConverterErr := marshaler.callConverter(converter, i, preSelection)
+			result, callConverterErr := unmarshaler.callConverter(converter, i, preSelection)
 			if err = callConverterErr; err == nil {
 				fieldPtr.Elem().Set(result)
 			}
@@ -261,18 +261,18 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 	return
 }
 
-func (marshaler HTMLUnmarshaler) unmarshal() (err error) {
-	preSelection := marshaler.getSelection()
-	if marshaler.getSelector() != ZeroStr {
-		preSelection = *preSelection.Find(marshaler.getSelector())
+func (unmarshaler HTMLUnmarshaler) unmarshal() (err error) {
+	preSelection := unmarshaler.getSelection()
+	if unmarshaler.getSelector() != ZeroStr {
+		preSelection = *preSelection.Find(unmarshaler.getSelector())
 	}
-	switch marshaler.getKind() {
+	switch unmarshaler.getKind() {
 	case reflect.Slice:
-		err = marshaler.unmarshalSlice(preSelection)
+		err = unmarshaler.unmarshalSlice(preSelection)
 	case reflect.Struct:
-		err = marshaler.unmarshalStruct(preSelection)
+		err = unmarshaler.unmarshalStruct(preSelection)
 	case reflect.String:
-		marshaler.getDto().Elem().SetString(marshaler.getAttrValue(preSelection))
+		unmarshaler.getDto().Elem().SetString(unmarshaler.getAttrValue(preSelection))
 	case reflect.Int:
 		fallthrough
 	case reflect.Int8:
@@ -282,10 +282,10 @@ func (marshaler HTMLUnmarshaler) unmarshal() (err error) {
 	case reflect.Int32:
 		fallthrough
 	case reflect.Int64:
-		valueStr := marshaler.getAttrValue(preSelection)
+		valueStr := unmarshaler.getAttrValue(preSelection)
 		value, err := strconv.Atoi(valueStr)
 		if err == nil {
-			marshaler.getDto().Elem().SetInt(int64(value))
+			unmarshaler.getDto().Elem().SetInt(int64(value))
 		}
 	case reflect.Uint:
 		fallthrough
@@ -296,35 +296,35 @@ func (marshaler HTMLUnmarshaler) unmarshal() (err error) {
 	case reflect.Uint32:
 		fallthrough
 	case reflect.Uint64:
-		valueStr := marshaler.getAttrValue(preSelection)
+		valueStr := unmarshaler.getAttrValue(preSelection)
 		value, err := strconv.ParseUint(valueStr, 0, 0)
 		if err == nil {
-			marshaler.getDto().Elem().SetUint(value)
+			unmarshaler.getDto().Elem().SetUint(value)
 		}
 	case reflect.Float32:
 		fallthrough
 	case reflect.Float64:
-		valueStr := marshaler.getAttrValue(preSelection)
+		valueStr := unmarshaler.getAttrValue(preSelection)
 		value, err := strconv.ParseFloat(valueStr, 0)
 		if err == nil {
-			marshaler.getDto().Elem().SetFloat(value)
+			unmarshaler.getDto().Elem().SetFloat(value)
 		}
 	case reflect.Bool:
-		valueStr := marshaler.getAttrValue(preSelection)
+		valueStr := unmarshaler.getAttrValue(preSelection)
 		value, err := strconv.ParseBool(valueStr)
 		if err == nil {
-			marshaler.getDto().Elem().SetBool(value)
+			unmarshaler.getDto().Elem().SetBool(value)
 		}
 	}
 
 	return err
 }
 
-func (marshaler HTMLUnmarshaler) getAttrValue(selection goquery.Selection) (valueStr string) {
-	if marshaler.getAttrKey() == ZeroStr {
+func (unmarshaler HTMLUnmarshaler) getAttrValue(selection goquery.Selection) (valueStr string) {
+	if unmarshaler.getAttrKey() == ZeroStr {
 		valueStr = selection.Text()
 	} else {
-		if str, exist := selection.Attr(marshaler.getAttrKey()); exist {
+		if str, exist := selection.Attr(unmarshaler.getAttrKey()); exist {
 			valueStr = str
 		}
 	}
