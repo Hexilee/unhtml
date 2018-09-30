@@ -109,7 +109,6 @@ func TestBuilderErr(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, UnmarshalerItemKindError{reflect.TypeOf(new(TestUser))}.Error(), err.Error())
 
-
 }
 
 func BenchmarkUnmarshalCourse(b *testing.B) {
