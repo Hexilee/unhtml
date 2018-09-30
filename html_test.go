@@ -73,14 +73,14 @@ func (AllTypeTest) Root() string {
 func TestHTMLUnmarshaler_Unmarshal(t *testing.T) {
 	assert.NotNil(t, CourseHTML)
 	courses := make(Courses, 0)
-	assert.Nil(t, new(HTMLUnmarshaler).Unmarshal(CourseHTML, &courses))
+	assert.Nil(t, Unmarshal(CourseHTML, &courses))
 	result, err := json.Marshal(courses)
 	assert.Nil(t, err)
 	assert.Equal(t, CoursesJSON, string(result))
 
 	assert.NotNil(t, AllTypeHTML)
 	allTypes := AllTypeTest{}
-	assert.Nil(t, new(HTMLUnmarshaler).Unmarshal(AllTypeHTML, &allTypes))
+	assert.Nil(t, Unmarshal(AllTypeHTML, &allTypes))
 	result, err = json.Marshal(&allTypes)
 	assert.Nil(t, err)
 	assert.Equal(t, AllTypesJSON, string(result))
@@ -90,7 +90,7 @@ func BenchmarkUnmarshalCourse(b *testing.B) {
 	assert.NotNil(b, CourseHTML)
 	for i := 0; i < b.N; i++ {
 		courses := make(Courses, 0)
-		assert.Nil(b, new(HTMLUnmarshaler).Unmarshal(CourseHTML, &courses))
+		assert.Nil(b, Unmarshal(CourseHTML, &courses))
 	}
 }
 
