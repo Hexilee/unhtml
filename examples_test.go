@@ -37,7 +37,7 @@ const (
 )
 
 func ExampleUnmarshal() {
-	var allTypes HTMLModel = AllTypeTest{}
+	allTypes := AllTypeTest{}
 	_ = Unmarshal(AllTypeHTML, &allTypes)
 	result, _ := json.Marshal(&allTypes)
 	fmt.Println(string(result))
