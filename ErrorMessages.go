@@ -1,6 +1,7 @@
 package unhtml
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -10,6 +11,7 @@ const (
 	DtoZero                  = "dto cannot be zero"
 	SelectionNil             = "selection cannot be nil"
 	ConverterNotExist        = "converter not exist"
+	ConverterTypeWrong       = "type of converter is wrong"
 )
 
 type (
@@ -24,7 +26,16 @@ type (
 	ConverterNotExistError struct {
 		Name string
 	}
+
+	ConverterTypeWrongError struct {
+		name       string
+		methodType reflect.Type
+	}
 )
+
+func NewConverterTypeWrongError(name string, methodType reflect.Type) *ConverterTypeWrongError {
+	return &ConverterTypeWrongError{name, methodType}
+}
 
 func (err UnmarshaledKindMustBePtrError) Error() string {
 	return UnmarshaledKindMustBePtr + ": " + err.Type.String()
@@ -35,5 +46,9 @@ func (err UnmarshalerItemKindError) Error() string {
 }
 
 func (err ConverterNotExistError) Error() string {
-	return UnmarshalerItemKind + ": " + err.Name
+	return ConverterNotExist + ": " + err.Name
+}
+
+func (err ConverterTypeWrongError) Error() string {
+	return fmt.Sprintf(ConverterTypeWrong+"(%s): %s", err.name, err.methodType)
 }

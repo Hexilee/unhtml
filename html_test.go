@@ -65,6 +65,10 @@ type (
 	WrongTypes struct {
 		WrongStruct *TestUser `html:"div"`
 	}
+
+	ConverterTest struct {
+		ConvertedStruct map[string]interface{} `html:"div" converter:"TestUserToMap"`
+	}
 )
 
 func (Courses) Root() string {
@@ -77,6 +81,18 @@ func (AllTypeTest) Root() string {
 
 func (WrongTypes) Root() string {
 	return "#test"
+}
+
+func (ConverterTest) Root() string {
+	return "#test"
+}
+
+func (ConverterTest) TestUserToMap(user TestUser) (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"name":       user.Name,
+		"age":        user.Age,
+		"like_lemon": user.LikeLemon,
+	}, nil
 }
 
 func TestUnmarshal(t *testing.T) {
@@ -108,6 +124,13 @@ func TestBuilderErr(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, UnmarshalerItemKindError{reflect.TypeOf(new(TestUser))}.Error(), err.Error())
 
+}
+
+func TestConverter(t *testing.T) {
+	assert.NotNil(t, AllTypeHTML)
+	convertedStruct := ConverterTest{}
+	assert.Nil(t, Unmarshal(AllTypeHTML, &convertedStruct))
+	assert.Equal(t, "Hexilee", convertedStruct.ConvertedStruct["name"])
 }
 
 func BenchmarkUnmarshalCourse(b *testing.B) {

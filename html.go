@@ -222,13 +222,13 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 				err = &ConverterNotExistError{converter}
 				break
 			}
-			inputType, converterTypeErr := checkConverter(method, motherType.Field(i).Type)
+			methodValue := motherValue.MethodByName(converter)
+			inputValuePtr, converterTypeErr := checkConverter(method.Name, methodValue.Type(), motherType.Field(i).Type)
 			if converterTypeErr != nil {
 				err = converterTypeErr
 				break
 			}
 
-			inputValuePtr := reflect.New(inputType)
 			newUnmarshal, buildErr := new(HTMLUnmarshalerBuilder).
 				setDto(inputValuePtr).
 				setSelection(&preSelection).
@@ -243,9 +243,9 @@ func (marshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selection)
 				break
 			}
 
-			methodValue := motherValue.MethodByName(converter)
 			results := methodValue.Call([]reflect.Value{inputValuePtr.Elem()})
-			if err = results[1].Interface().(error); err!= nil {
+			if errInterface := results[1].Interface(); errInterface != nil {
+				err = errInterface.(error)
 				break
 			}
 			fieldPtr.Elem().Set(results[0])
