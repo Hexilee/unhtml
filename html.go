@@ -243,19 +243,22 @@ func (unmarshaler HTMLUnmarshaler) unmarshalStruct(preSelection goquery.Selectio
 	motherValue := unmarshaler.getDto().Elem()
 	motherType := unmarshaler.getDtoElemType()
 	for i := 0; i < motherValue.NumField(); i++ {
-		fieldPtr := motherValue.Field(i).Addr()
-		tag := motherType.Field(i).Tag
-		if converter := tag.Get(ConverterKey); converter != ZeroStr {
-			result, callConverterErr := unmarshaler.callConverter(converter, i, preSelection)
-			if err = callConverterErr; err == nil {
-				fieldPtr.Elem().Set(result)
+		field := motherValue.Field(i)
+		if field.CanSet() {
+			fieldPtr := field.Addr()
+			tag := motherType.Field(i).Tag
+			if converter := tag.Get(ConverterKey); converter != ZeroStr {
+				result, callConverterErr := unmarshaler.callConverter(converter, i, preSelection)
+				if err = callConverterErr; err == nil {
+					fieldPtr.Elem().Set(result)
+				}
+			} else {
+				err = unmarshal(fieldPtr, preSelection, tag)
 			}
-		} else {
-			err = unmarshal(fieldPtr, preSelection, tag)
-		}
 
-		if err != nil {
-			break
+			if err != nil {
+				break
+			}
 		}
 	}
 	return

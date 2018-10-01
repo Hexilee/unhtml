@@ -4,6 +4,22 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Hexilee/unhtml/blob/master/LICENSE)
 [![Documentation](https://godoc.org/github.com/Hexilee/unhtml?status.svg)](https://godoc.org/github.com/Hexilee/unhtml)
 
+Table of Contents
+=================
+
+* [Example &amp; Performance](#example--performance)
+* [Tips &amp; Features](#tips--features)
+  * [Types](#types)
+  * [Root](#root)
+  * [Selector](#selector)
+     * [Struct](#struct)
+     * [Slice](#slice)
+  * [Tags](#tags)
+     * [html](#html)
+     * [attr](#attr)
+     * [converter](#converter)
+
+
 ### Example & Performance
 
 A HTML file
@@ -190,7 +206,7 @@ func parseAllTypesLogically() (AllTypeTest, error) {
 
 ```
 
-It works pretty good, but boring. And now, you can do like this:
+It works pretty good, but is boring. And now, you can do like this:
 
 ```go
 package main
@@ -322,9 +338,9 @@ which is compatible with the standard libraries `json` and `xml`. However, you c
 
 #### Types
 
-This package support part kinds of type, the all kinds of type in the `reflect` package except `Ptr/Uintptr/Interface/Chan/Func`.
+This package supports part kinds of type, the all kinds of type in the `reflect` package except `Ptr/Uintptr/Interface/Chan/Func`.
 
-Follow fields are not supported and will cause `UnmarshalerItemKindError`.
+Follow fields are invalid and will cause `UnmarshalerItemKindError`.
 
 ```go
 type WrongFieldsStruct struct {
@@ -336,7 +352,7 @@ type WrongFieldsStruct struct {
 }
 ```
 
-However, when you call the function `Unmarshal`, you must pass a pointer otherwise you will get an `UnmarshaledKindMustBePtrError`.
+However, when you call the function `Unmarshal`, you **MUST** pass a pointer otherwise you will get an `UnmarshaledKindMustBePtrError`.
 
 ```go
 a := 1
@@ -522,5 +538,96 @@ Then, it will call `*goquery.Selection.Each(func(int, *goquery.Selection))`, ite
 
 #### Tags
 
-This package supports three tags, `html`, `key`
+This package supports three tags, `html`, `attr` and `converter`
+
+##### html
+
+Provide the `css selector` of this field.
+
+##### attr
+
+By default, this package regard the `innerText` of a element as its `value`
+
+```html
+<a href="https://google.com">Google</a>
+```
+
+```go
+type Link struct {
+    Text string `html:"a"`
+}
+```
+
+You will get `Text = Google`. However, how should we do if we want to get `href`?
+
+```go
+type Link struct {
+    Href string `html:"a" attr:"href"`
+    Text string `html:"a"`
+}
+```
+
+You will get `link.Href == "https://google.com"`
+
+##### converter
+
+Sometimes, you want to process the original data
+
+```html
+<p>2018-10-01 00:00:01</p>
+```
+
+You may unmarshal it like this
+
+```go
+type Birthday struct {
+	Time time.Time `html:"p"`
+}
+
+func TestConverter(t *testing.T) {
+	birthday := Birthday{}
+	assert.Nil(t, Unmarshal([]byte(BirthdayHTML), &birthday))
+	assert.Equal(t, 2018, birthday.Time.Year())
+	assert.Equal(t, time.October, birthday.Time.Month())
+	assert.Equal(t, 1, birthday.Time.Day())
+}
+```
+
+Absolutely, you will fail, because you don't define the way converts string to time.Time. `unhtml` will regard it as a struct.
+
+However, you can use `converter`
+
+```go
+type Birthday struct {
+    Time time.Time `html:"p" converter:"StringToTime"`
+}
+
+const TimeStandard = `2006-01-02 15:04:05`
+
+func (Birthday) StringToTime(str string) (time.Time, error) {
+	return time.Parse(TimeStandard, str)
+}
+
+func TestConverter(t *testing.T) {
+	birthday := Birthday{}
+	assert.Nil(t, Unmarshal([]byte(BirthdayHTML), &birthday))
+	assert.Equal(t, 2018, birthday.Time.Year())
+	assert.Equal(t, time.October, birthday.Time.Month())
+	assert.Equal(t, 1, birthday.Time.Day())
+}
+```
+
+Make it.
+
+The type of converter **MUST** be 
+
+```go
+func (inputType) (resultType, error)
+```
+
+`resultType` **MUST** be the same with the field type, and they can be any type.
+
+`inputType` **MUST NOT** violate the requirements in [Types](#types).
+
+
 
