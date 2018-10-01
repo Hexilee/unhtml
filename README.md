@@ -125,54 +125,19 @@ func parseAllTypesLogically() (AllTypeTest, error) {
 					allTypes.Struct.LikeLemon = Bool
 
 					String := selection.Find(`#test > p:nth-child(3)"`).Text()
-					Int, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
-
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Int8, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Int16, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Int32, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Int64, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Uint, parseErr := strconv.ParseUint(selection.Find(`#test > p:nth-child(4)`).Text(), 0, 0)
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Uint8, parseErr := strconv.ParseUint(selection.Find(`#test > p:nth-child(4)`).Text(), 0, 0)
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Uint16, parseErr := strconv.ParseUint(selection.Find(`#test > p:nth-child(4)`).Text(), 0, 0)
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Uint32, parseErr := strconv.ParseUint(selection.Find(`#test > p:nth-child(4)`).Text(), 0, 0)
-					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-					Uint64, parseErr := strconv.ParseUint(selection.Find(`#test > p:nth-child(4)`).Text(), 0, 0)
+					IntStr := selection.Find(`#test > p:nth-child(4)`).Text()
+					Int, parseErr := strconv.Atoi(IntStr)
 					if err = parseErr; err != nil {
 						return allTypes, err
 					}
 
-					Float32, parseErr := strconv.ParseFloat(selection.Find(`#test > p:nth-child(5)`).Text(), 0)
+					Uint64, parseErr := strconv.ParseUint(IntStr, 0, 0)
 					if err = parseErr; err != nil {
 						return allTypes, err
 					}
 
-					Float64, parseErr := strconv.ParseFloat(selection.Find(`#test > p:nth-child(5)`).Text(), 0)
+					FloatStr := selection.Find(`#test > p:nth-child(5)`).Text()
+					Float64, parseErr := strconv.ParseFloat(FloatStr, 0)
 					if err = parseErr; err != nil {
 						return allTypes, err
 					}
@@ -183,19 +148,18 @@ func parseAllTypesLogically() (AllTypeTest, error) {
 					}
 					allTypes.String = String
 					allTypes.Int = Int
-					allTypes.Int8 = int8(Int8)
-					allTypes.Int16 = int16(Int16)
-					allTypes.Int32 = int32(Int32)
-					allTypes.Int64 = int64(Int64)
-					allTypes.Uint = uint(Uint)
-					allTypes.Uint8 = uint8(Uint8)
-					allTypes.Uint16 = uint16(Uint16)
-					allTypes.Uint32 = uint32(Uint32)
+					allTypes.Int8 = int8(Int)
+					allTypes.Int16 = int16(Int)
+					allTypes.Int32 = int32(Int)
+					allTypes.Int64 = int64(Int)
+					allTypes.Uint = uint(Uint64)
+					allTypes.Uint8 = uint8(Uint64)
+					allTypes.Uint16 = uint16(Uint64)
+					allTypes.Uint32 = uint32(Uint64)
 					allTypes.Uint64 = uint64(Uint64)
-					allTypes.Float32 = float32(Float32)
+					allTypes.Float32 = float32(Float64)
 					allTypes.Float64 = Float64
 					allTypes.Bool = Bool
-
 				}
 			}
 		}
@@ -318,8 +282,8 @@ Test it:
 goos: darwin
 goarch: amd64
 pkg: github.com/Hexilee/unhtml
-BenchmarkUnmarshalAllTypes-4        	   20000	     85108 ns/op
-BenchmarkParseAllTypesLogically-4   	   20000	     64781 ns/op
+BenchmarkUnmarshalAllTypes-4        	   20000	     83271 ns/op
+BenchmarkParseAllTypesLogically-4   	   30000	     45934 ns/op
 PASS
 ok  	github.com/Hexilee/unhtml	4.621s
 ```
