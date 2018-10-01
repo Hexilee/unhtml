@@ -63,26 +63,18 @@ If we want to parse it and get the values we want, like follow structs, how shou
 
 
 ```go
+package example
+
 type (
-	AllTypeTest struct {
+	PartTypesStruct struct {
 		Slice   []int    
 		Struct  TestUser 
 		String  string   
 		Int     int      
-		Int8    int8     
-		Int16   int16    
-		Int32   int32    
-		Int64   int64    
-		Uint    uint     
-		Uint8   uint8    
-		Uint16  uint16   
-		Uint32  uint32   
-		Uint64  uint64   
-
-		Float32 float32  
 		Float64 float64  
 		Bool    bool     
 	}
+
 	TestUser struct {
 		Name      string 
 		Age       uint   
@@ -102,70 +94,52 @@ import (
 	"strconv"
 )
 
-func parseAllTypesLogically() (AllTypeTest, error) {
+func parsePartTypesLogically() (PartTypesStruct, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(AllTypeHTML))
-	allTypes := AllTypeTest{}
+	partTypes := PartTypesStruct{}
 	if err == nil {
-		selection := doc.Find(allTypes.Root())
-		allTypes.Slice = make([]int, 0)
+		selection := doc.Find(partTypes.Root())
+		partTypes.Slice = make([]int, 0)
 		selection.Find(`ul > li`).Each(func(i int, selection *goquery.Selection) {
 			Int, parseErr := strconv.Atoi(selection.Text())
 			if parseErr != nil {
 				err = parseErr
 			}
-			allTypes.Slice = append(allTypes.Slice, Int)
+			partTypes.Slice = append(partTypes.Slice, Int)
 		})
 		if err == nil {
-			allTypes.Struct.Name = selection.Find(`#test > div > p:nth-child(1)`).Text()
+			partTypes.Struct.Name = selection.Find(`#test > div > p:nth-child(1)`).Text()
 			Int, parseErr := strconv.Atoi(selection.Find(`#test > div > p:nth-child(2)`).Text())
 			if err = parseErr; err == nil {
-				allTypes.Struct.Age = uint(Int)
+				partTypes.Struct.Age = uint(Int)
 				Bool, parseErr := strconv.ParseBool(selection.Find(`#test > div > p:nth-child(3)`).Text())
 				if err = parseErr; err == nil {
-					allTypes.Struct.LikeLemon = Bool
+					partTypes.Struct.LikeLemon = Bool
 
 					String := selection.Find(`#test > p:nth-child(3)"`).Text()
-					IntStr := selection.Find(`#test > p:nth-child(4)`).Text()
-					Int, parseErr := strconv.Atoi(IntStr)
+					Int, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
 					if err = parseErr; err != nil {
-						return allTypes, err
+						return partTypes, err
 					}
 
-					Uint64, parseErr := strconv.ParseUint(IntStr, 0, 0)
+					Float64, parseErr := strconv.ParseFloat(selection.Find(`#test > p:nth-child(5)`).Text(), 0)
 					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-
-					FloatStr := selection.Find(`#test > p:nth-child(5)`).Text()
-					Float64, parseErr := strconv.ParseFloat(FloatStr, 0)
-					if err = parseErr; err != nil {
-						return allTypes, err
+						return partTypes, err
 					}
 
 					Bool, parseErr := strconv.ParseBool(selection.Find(`#test > p:nth-child(6)`).Text())
 					if err = parseErr; err != nil {
-						return allTypes, err
+						return partTypes, err
 					}
-					allTypes.String = String
-					allTypes.Int = Int
-					allTypes.Int8 = int8(Int)
-					allTypes.Int16 = int16(Int)
-					allTypes.Int32 = int32(Int)
-					allTypes.Int64 = int64(Int)
-					allTypes.Uint = uint(Uint64)
-					allTypes.Uint8 = uint8(Uint64)
-					allTypes.Uint16 = uint16(Uint64)
-					allTypes.Uint32 = uint32(Uint64)
-					allTypes.Uint64 = uint64(Uint64)
-					allTypes.Float32 = float32(Float64)
-					allTypes.Float64 = Float64
-					allTypes.Bool = Bool
+					partTypes.String = String
+					partTypes.Int = Int
+					partTypes.Float64 = Float64
+					partTypes.Bool = Bool
 				}
 			}
 		}
 	}
-
-	return allTypes, err
+	return partTypes, err
 }
 
 ```
@@ -183,25 +157,15 @@ import (
 )
 
 type (
-	AllTypeTest struct {
+	PartTypesStruct struct {
 		Slice   []int    `html:"ul > li"`
 		Struct  TestUser `html:"#test > div"`
 		String  string   `html:"#test > p:nth-child(3)"`
 		Int     int      `html:"#test > p:nth-child(4)"`
-		Int8    int8     `html:"#test > p:nth-child(4)"`
-		Int16   int16    `html:"#test > p:nth-child(4)"`
-		Int32   int32    `html:"#test > p:nth-child(4)"`
-		Int64   int64    `html:"#test > p:nth-child(4)"`
-		Uint    uint     `html:"#test > p:nth-child(4)"`
-		Uint8   uint8    `html:"#test > p:nth-child(4)"`
-		Uint16  uint16   `html:"#test > p:nth-child(4)"`
-		Uint32  uint32   `html:"#test > p:nth-child(4)"`
-		Uint64  uint64   `html:"#test > p:nth-child(4)"`
-		Float32 float32  `html:"#test > p:nth-child(5)"`
 		Float64 float64  `html:"#test > p:nth-child(5)"`
 		Bool    bool     `html:"#test > p:nth-child(6)"`
 	}
-
+	
 	TestUser struct {
 		Name      string `html:"p:nth-child(1)"`
 		Age       uint   `html:"p:nth-child(2)"`
@@ -209,12 +173,12 @@ type (
 	}
 )
 
-func (AllTypeTest) Root() string {
+func (PartTypesStruct) Root() string {
 	return "#test"
 }
 
 func main() {
-	allTypes := AllTypeTest{}
+	allTypes := PartTypesStruct{}
 	_ := unhtml.Unmarshal(AllTypeHTML, &allTypes)
 	result, _ := json.Marshal(&allTypes)
 	fmt.Println(string(result))
@@ -238,16 +202,6 @@ Result:
   },
   "String": "Hello World!",
   "Int": 10,
-  "Int8": 10,
-  "Int16": 10,
-  "Int32": 10,
-  "Int64": 10,
-  "Uint": 10,
-  "Uint8": 10,
-  "Uint16": 10,
-  "Uint32": 10,
-  "Uint64": 10,
-  "Float32": 3.14,
   "Float64": 3.14,
   "Bool": true
 }
@@ -258,18 +212,18 @@ I think it can improve much efficiency of my development, however, what about it
 There are two benchmarks
 
 ```go
-func BenchmarkUnmarshalAllTypes(b *testing.B) {
+func BenchmarkUnmarshalPartTypes(b *testing.B) {
 	assert.NotNil(b, AllTypeHTML)
 	for i := 0; i < b.N; i++ {
-		allTypes := AllTypeTest{}
-		assert.Nil(b, Unmarshal(AllTypeHTML, &allTypes))
+		partTypes := PartTypesStruct{}
+		assert.Nil(b, Unmarshal(AllTypeHTML, &partTypes))
 	}
 }
 
-func BenchmarkParseAllTypesLogically(b *testing.B) {
+func BenchmarkParsePartTypesLogically(b *testing.B) {
 	assert.NotNil(b, AllTypeHTML)
 	for i := 0; i < b.N; i++ {
-		_, err := parseAllTypesLogically()
+		_, err := parsePartTypesLogically()
 		assert.Nil(b, err)
 	}
 }
@@ -282,8 +236,8 @@ Test it:
 goos: darwin
 goarch: amd64
 pkg: github.com/Hexilee/unhtml
-BenchmarkUnmarshalAllTypes-4        	   20000	     83271 ns/op
-BenchmarkParseAllTypesLogically-4   	   30000	     45934 ns/op
+BenchmarkUnmarshalPartTypes-4        	   20000	     55101 ns/op
+BenchmarkParsePartTypesLogically-4   	   30000	     44695 ns/op
 PASS
 ok  	github.com/Hexilee/unhtml	4.621s
 ```
@@ -335,7 +289,7 @@ Return the root selector.
 You are only supported to define a `Root() string` method for the root type, like
 
 ```go
-func (AllTypeTest) Root() string {
+func (PartTypesStruct) Root() string {
 	return "#test"
 }
 ```
@@ -348,11 +302,11 @@ func (TestUser) Root() string {
 }
 ```
 
-In this case, in `AllTypeTest`, the field selector will be covered.
+In this case, in `PartTypesStruct`, the field selector will be covered.
 
 ```go
 type (
-	AllTypeTest struct {
+	PartTypesStruct struct {
 		...
 		Struct  TestUser `html:"#test > div"`
 		...
@@ -361,7 +315,7 @@ type (
 
 // real
 type (
-	AllTypeTest struct {
+	PartTypesStruct struct {
 		...
 		Struct  TestUser `html:"#test"`
 		...
@@ -379,7 +333,7 @@ You can define selector of a field in tag, like this
 
 ```go
 type (
-	AllTypeTest struct {
+	PartTypesStruct struct {
 	   ...
 		Int     int      `html:"#test > p:nth-child(4)"`
 		...
@@ -395,7 +349,7 @@ However, when the field type is `Struct` or `Slice`, something will be more comp
 
 ```go
 type (
-	AllTypeTest struct {
+	PartTypesStruct struct {
 		...
 		Struct  TestUser `html:"#test > div"`
 		...
@@ -408,7 +362,7 @@ type (
 	}
 )
 
-func (AllTypeTest) Root() string {
+func (PartTypesStruct) Root() string {
 	return "#test"
 }
 ```
@@ -457,12 +411,12 @@ Then, in `TestUser`, it will call
 
 ```go
 type (
-	AllTypeTest struct {
+	PartTypesStruct struct {
 		Slice   []int    `html:"ul > li"`		...
 	}
 )
 
-func (AllTypeTest) Root() string {
+func (PartTypesStruct) Root() string {
 	return "#test"
 }
 ```

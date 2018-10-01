@@ -8,6 +8,21 @@ import (
 	"testing"
 )
 
+type (
+	PartTypesStruct struct {
+		Slice   []int    `html:"ul > li"`
+		Struct  TestUser `html:"#test > div"`
+		String  string   `html:"#test > p:nth-child(3)"`
+		Int     int      `html:"#test > p:nth-child(4)"`
+		Float64 float64  `html:"#test > p:nth-child(5)"`
+		Bool    bool     `html:"#test > p:nth-child(6)"`
+	}
+)
+
+func (PartTypesStruct) Root() string {
+	return "#test"
+}
+
 func BenchmarkUnmarshalCourses(b *testing.B) {
 	assert.NotNil(b, CourseHTML)
 	for i := 0; i < b.N; i++ {
@@ -16,11 +31,11 @@ func BenchmarkUnmarshalCourses(b *testing.B) {
 	}
 }
 
-func BenchmarkUnmarshalAllTypes(b *testing.B) {
+func BenchmarkUnmarshalPartTypes(b *testing.B) {
 	assert.NotNil(b, AllTypeHTML)
 	for i := 0; i < b.N; i++ {
-		allTypes := AllTypeTest{}
-		assert.Nil(b, Unmarshal(AllTypeHTML, &allTypes))
+		partTypes := PartTypesStruct{}
+		assert.Nil(b, Unmarshal(AllTypeHTML, &partTypes))
 	}
 }
 
@@ -32,10 +47,10 @@ func BenchmarkParseCoursesLogically(b *testing.B) {
 	}
 }
 
-func BenchmarkParseAllTypesLogically(b *testing.B) {
+func BenchmarkParsePartTypesLogically(b *testing.B) {
 	assert.NotNil(b, AllTypeHTML)
 	for i := 0; i < b.N; i++ {
-		_, err := parseAllTypesLogically()
+		_, err := parsePartTypesLogically()
 		assert.Nil(b, err)
 	}
 }
@@ -64,68 +79,51 @@ func parseCoursesLogically() (Courses, error) {
 	return courses, err
 }
 
-func parseAllTypesLogically() (AllTypeTest, error) {
+func parsePartTypesLogically() (PartTypesStruct, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(AllTypeHTML))
-	allTypes := AllTypeTest{}
+	partTypes := PartTypesStruct{}
 	if err == nil {
-		selection := doc.Find(allTypes.Root())
-		allTypes.Slice = make([]int, 0)
+		selection := doc.Find(partTypes.Root())
+		partTypes.Slice = make([]int, 0)
 		selection.Find(`ul > li`).Each(func(i int, selection *goquery.Selection) {
 			Int, parseErr := strconv.Atoi(selection.Text())
 			if parseErr != nil {
 				err = parseErr
 			}
-			allTypes.Slice = append(allTypes.Slice, Int)
+			partTypes.Slice = append(partTypes.Slice, Int)
 		})
 		if err == nil {
-			allTypes.Struct.Name = selection.Find(`#test > div > p:nth-child(1)`).Text()
+			partTypes.Struct.Name = selection.Find(`#test > div > p:nth-child(1)`).Text()
 			Int, parseErr := strconv.Atoi(selection.Find(`#test > div > p:nth-child(2)`).Text())
 			if err = parseErr; err == nil {
-				allTypes.Struct.Age = uint(Int)
+				partTypes.Struct.Age = uint(Int)
 				Bool, parseErr := strconv.ParseBool(selection.Find(`#test > div > p:nth-child(3)`).Text())
 				if err = parseErr; err == nil {
-					allTypes.Struct.LikeLemon = Bool
+					partTypes.Struct.LikeLemon = Bool
 
 					String := selection.Find(`#test > p:nth-child(3)"`).Text()
-					IntStr := selection.Find(`#test > p:nth-child(4)`).Text()
-					Int, parseErr := strconv.Atoi(IntStr)
+					Int, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
 					if err = parseErr; err != nil {
-						return allTypes, err
+						return partTypes, err
 					}
 
-					Uint64, parseErr := strconv.ParseUint(IntStr, 0, 0)
+					Float64, parseErr := strconv.ParseFloat(selection.Find(`#test > p:nth-child(5)`).Text(), 0)
 					if err = parseErr; err != nil {
-						return allTypes, err
-					}
-
-					FloatStr := selection.Find(`#test > p:nth-child(5)`).Text()
-					Float64, parseErr := strconv.ParseFloat(FloatStr, 0)
-					if err = parseErr; err != nil {
-						return allTypes, err
+						return partTypes, err
 					}
 
 					Bool, parseErr := strconv.ParseBool(selection.Find(`#test > p:nth-child(6)`).Text())
 					if err = parseErr; err != nil {
-						return allTypes, err
+						return partTypes, err
 					}
-					allTypes.String = String
-					allTypes.Int = Int
-					allTypes.Int8 = int8(Int)
-					allTypes.Int16 = int16(Int)
-					allTypes.Int32 = int32(Int)
-					allTypes.Int64 = int64(Int)
-					allTypes.Uint = uint(Uint64)
-					allTypes.Uint8 = uint8(Uint64)
-					allTypes.Uint16 = uint16(Uint64)
-					allTypes.Uint32 = uint32(Uint64)
-					allTypes.Uint64 = uint64(Uint64)
-					allTypes.Float32 = float32(Float64)
-					allTypes.Float64 = Float64
-					allTypes.Bool = Bool
+					partTypes.String = String
+					partTypes.Int = Int
+					partTypes.Float64 = Float64
+					partTypes.Bool = Bool
 				}
 			}
 		}
 	}
 
-	return allTypes, err
+	return partTypes, err
 }
