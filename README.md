@@ -236,10 +236,10 @@ Test it:
 goos: darwin
 goarch: amd64
 pkg: github.com/Hexilee/unhtml
-BenchmarkUnmarshalPartTypes-4        	   20000	     55101 ns/op
-BenchmarkParsePartTypesLogically-4   	   30000	     44695 ns/op
+BenchmarkUnmarshalPartTypes-4        	   30000	     54096 ns/op
+BenchmarkParsePartTypesLogically-4   	   30000	     45188 ns/op
 PASS
-ok  	github.com/Hexilee/unhtml	4.621s
+ok  	github.com/Hexilee/unhtml	4.098s
 ```
 
 Not very bad, in consideration of the small size of the demo HTML. In true development with more complicated HTML, their efficiency are almost the same.
