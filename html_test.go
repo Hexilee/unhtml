@@ -23,7 +23,7 @@ var (
 type (
 	Link struct {
 		Text string `json:"text"`
-		Href string `key:"href" json:"href"`
+		Href string `attr:"href" json:"href"`
 	}
 
 	Course struct {

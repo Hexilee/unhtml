@@ -37,7 +37,7 @@ type (
 
 const (
 	SelectorKey  = "html"
-	AttrKey      = "key"
+	AttrKey      = "attr"
 	ConverterKey = "converter"
 	ZeroStr      = ""
 )
