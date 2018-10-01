@@ -116,7 +116,7 @@ func parsePartTypesLogically() (PartTypesStruct, error) {
 				if err = parseErr; err == nil {
 					partTypes.Struct.LikeLemon = Bool
 
-					String := selection.Find(`#test > p:nth-child(3)"`).Text()
+					String := selection.Find(`#test > p:nth-child(3)`).Text()
 					Int, parseErr := strconv.Atoi(selection.Find(`#test > p:nth-child(4)`).Text())
 					if err = parseErr; err != nil {
 						return partTypes, err
