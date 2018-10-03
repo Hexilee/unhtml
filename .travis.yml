@@ -19,7 +19,7 @@ install:
 script: # 集成脚本
 - go test -bench=.
 - go test -v -cover -coverprofile=go.coverprofile
-- goveralls -coverprofile=go.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
+- goveralls -coverprofile=go.coverprofile -service=travis-ci -repotoken=$COVERALLS_TOKEN
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
