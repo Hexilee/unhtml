@@ -59,7 +59,7 @@ Read it
 AllTypeHTML, _ := ioutil.ReadFile("testHTML/all-type.html")
 ```
 
-If we want to parse it and get the values we want, like follow structs, how should we do?
+If we want to parse it and get the values we want, like the following structs, how should we do it?
 
 
 ```go
@@ -83,7 +83,7 @@ type (
 )
 ```
 
-In traditional way, we should do like this
+In the traditional way, we should do it like this:
 
 ```go
 package example
@@ -144,7 +144,7 @@ func parsePartTypesLogically() (PartTypesStruct, error) {
 
 ```
 
-It works pretty good, but is boring. And now, you can do like this:
+It works pretty well, but is boring. And now, you can do it like this:
 
 ```go
 package main
@@ -207,9 +207,9 @@ Result:
 }
 ```
 
-I think it can improve much efficiency of my development, however, what about its performance?
+I think it can really improve the efficiency of my development, but what about its performance?
 
-There are two benchmarks
+There are two benchmarks:
 
 ```go
 func BenchmarkUnmarshalPartTypes(b *testing.B) {
@@ -242,23 +242,23 @@ PASS
 ok  	github.com/Hexilee/unhtml	4.098s
 ```
 
-Not very bad, in consideration of the small size of the demo HTML. In true development with more complicated HTML, their efficiency are almost the same.
+Not very bad, in consideration of the small size of the demo HTML. In true development with more complicated HTML, their efficiency is almost the same.
 
 ### Tips & Features
 
-The only API this package exposed is the function, 
+The only API this package exposes is the function:
 
 ```go
 func Unmarshal(data []byte, v interface{}) error
 ```
 
-which is compatible with the standard libraries `json` and `xml`. However, you can do some jobs with the data types in your code.
+which is compatible with the standard library's `json` and `xml`. However, you can do some jobs with the data types in your code.
 
 #### Types
 
-This package supports part kinds of type, the all kinds of type in the `reflect` package except `Ptr/Uintptr/Interface/Chan/Func`.
+This package supports all kinds of type in the `reflect` package except `Ptr/Uintptr/Interface/Chan/Func`.
 
-Follow fields are invalid and will cause `UnmarshalerItemKindError`.
+The following fields are invalid and will cause `UnmarshalerItemKindError`.
 
 ```go
 type WrongFieldsStruct struct {
@@ -270,7 +270,7 @@ type WrongFieldsStruct struct {
 }
 ```
 
-However, when you call the function `Unmarshal`, you **MUST** pass a pointer otherwise you will get an `UnmarshaledKindMustBePtrError`.
+However, when you call the function `Unmarshal`, you **MUST** pass a pointer, otherwise you will get an `UnmarshaledKindMustBePtrError`.
 
 ```go
 a := 1
@@ -327,9 +327,9 @@ type (
 
 #### Selector
 
-This package base on `github.com/PuerkitoBio/goquery` and supports standard css selector.
+This package is based on `github.com/PuerkitoBio/goquery` and supports standard css selectors.
 
-You can define selector of a field in tag, like this
+You can define selectors of a field in tags, like this:
 
 ```go
 type (
@@ -343,7 +343,7 @@ type (
 
 In most cases, this package will find the `#test > p:nth-child(4)` element and try to parse its `innerText` as int.
 
-However, when the field type is `Struct` or `Slice`, something will be more complex.
+However, when the field type is `Struct` or `Slice`, it will be more complex.
 
 ##### Struct
 
@@ -464,7 +464,7 @@ Provide the `css selector` of this field.
 
 ##### attr
 
-By default, this package regard the `innerText` of a element as its `value`
+By default, this package regards the `innerText` of a element as its `value`
 
 ```html
 <a href="https://google.com">Google</a>
@@ -476,7 +476,7 @@ type Link struct {
 }
 ```
 
-You will get `Text = Google`. However, how should we do if we want to get `href`?
+You will get `Text = Google`. However, what should we do if we want to get `href`?
 
 ```go
 type Link struct {
@@ -511,7 +511,7 @@ func TestConverter(t *testing.T) {
 }
 ```
 
-Absolutely, you will fail, because you don't define the way converts string to time.Time. `unhtml` will regard it as a struct.
+Absolutely, you will fail, because you don't define the way it converts a string to time.Time. `unhtml` will regard it as a struct.
 
 However, you can use `converter`
 
@@ -543,7 +543,7 @@ The type of converter **MUST** be
 func (inputType) (resultType, error)
 ```
 
-`resultType` **MUST** be the same with the field type, and they can be any type.
+`resultType` **MUST** be the same as the field type, and they can be any type.
 
 `inputType` **MUST NOT** violate the requirements in [Types](#types).
 
